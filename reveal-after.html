@@ -1,0 +1,44 @@
+<script>
+// Injected by build.py via --include-after-body, i.e. immediately after the
+// Reveal.initialize() call that pandoc's template emits.
+(function () {
+  var printing = /print-pdf/.test(window.location.search);
+
+  if (printing) {
+    // reveal's Print.activate() sequences itself with
+    // `await new Promise(requestAnimationFrame)`. Headless Chrome under
+    // --virtual-time-budget doesn't reliably produce the compositor frames
+    // those hops wait on, so activation stalls, `loading-scroll-mode` keeps
+    // every slide hidden, and the PDF comes out as one blank page.
+    //
+    // Timers *are* driven by virtual time, so rAF is redirected onto one for
+    // the print pass only. Nothing animates while printing, so ordering is all
+    // reveal actually wants here.
+    window.requestAnimationFrame = function (cb) {
+      return window.setTimeout(function () { cb(performance.now()); }, 0);
+    };
+    window.cancelAnimationFrame = window.clearTimeout;
+
+    // Reveal.configure() re-evaluates the view mode and would drop back out of
+    // print layout, so the options below are skipped while printing.
+    return;
+  }
+
+  // Pandoc's reveal.js template only forwards a fixed allowlist of options, so
+  // anything outside it has to be applied after initialize().
+  //
+  // navigationMode:'linear' is the important one. Pandoc turns every `##` act
+  // into a *vertical* stack, which means left/right would jump act-to-act and
+  // skip their contents. Linear mode makes the arrows walk every slide in order.
+  function apply() {
+    Reveal.configure({
+      navigationMode: 'linear',
+      slideNumber: 'c/t',
+      pdfSeparateFragments: false
+    });
+  }
+  if (typeof Reveal === 'undefined') return;
+  if (Reveal.isReady && Reveal.isReady()) apply();
+  else Reveal.on('ready', apply);
+})();
+</script>

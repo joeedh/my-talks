@@ -1,12 +1,12 @@
-# Software Engineering With AI — Talk Notes
-
-**~45 min · mixed technical audience · 18 slides**
-
-Sourced from real artifacts in `path.ux` / `fairmotion` / `mathl` / `noise_fractal_stuff` /
-`pigment-painter` / `sculptcore` / `webgl-app-framework`.
-📄 = file:line source exists. ⚠️ = needs your confirmation.
-
 ---
+title: "Software Engineering With AI"
+author: "Joe Eagar"
+date: "Codium Consortium · September 2026"
+---
+
+<!-- PREP NOTES AND TODOS ARE AT THE BOTTOM OF THIS FILE.
+     Don't put them up here: anything between the YAML block and the first
+     header becomes a blank slide, and YAML rejects freeform text like "[ ]:". -->
 
 ## Personal History With Agentic AI
 
@@ -17,7 +17,7 @@ Sourced from real artifacts in `path.ux` / `fairmotion` / `mathl` / `noise_fract
 
 ### JS to TS porting
 
-*  My first experiences with AI (Claude Code) was porting JS code to TS. This was very painful:
+*  My first experiences with AI (Claude Code) were porting JS code to TS. This was very painful:
   - Claude kept wanting to add types to each file individually, driving typechecking errors to zero
     each time.
   - This produced hilariously garbage code [CLAUDE: insert code snippet from path.ux's git history of
@@ -25,7 +25,7 @@ Sourced from real artifacts in `path.ux` / `fairmotion` / `mathl` / `noise_fract
   - Told Claude Code to add types to all files at once with its own reasoning alone, and only
     then drive typechecking errors to zero.  This worked.
 
-### Sculptccore 
+### Sculptcore
 
 * Sculptcore is a digital sculpting system I designed years ago
 * Meant to be embedded in host 3D digital content creation (DCC) apps like Blender or Maya.
@@ -46,9 +46,13 @@ Sourced from real artifacts in `path.ux` / `fairmotion` / `mathl` / `noise_fract
 For what it's worth, when creating notes for this talk Claude had this to say:
 
 #### Why it worked — and the honest reason
+
 * Genuinely hard: type-erased thunks `void(*)(void*, void**, void*)` where every parameter kind is read differently from a variadic pack; class templates with **string-literal NTTPs** reflected into TS generics (`BuiltinAttr<float3, '.face.normal'>`)
-* 📄 The whole thing compiled only under `-fdelayed-template-parsing` — a clang MSVC-compat extension papering over two-phase lookup against an open overload set. The fix migrated ~124 call sites to a `Binder<T>::bind()` customization point.
+* The whole thing compiled only under `-fdelayed-template-parsing` — a clang MSVC-compat extension papering over two-phase lookup against an open overload set. The fix migrated ~124 call sites to a `Binder<T>::bind()` customization point.
 * **The AI wrote the method and constructor binders. Best result in the talk.**
+
+#### Why it worked (cont.)
+
 * **Why:** verification is nearly free. It compiles or it doesn't. And the refactor shipped behind a **zero-diff regeneration gate** — descriptors must regenerate byte-identical.
 * **The pattern:** leverage is highest where the problem is tedious-hard and the check is mechanical. Lowest where the check is taste.
 * Counterexample from the same work: node-addon-api's `CallbackInfo::Length()` returned `6e-310` garbage under clang-on-Windows. No model finds that — a spike did.
@@ -66,7 +70,7 @@ For what it's worth, when creating notes for this talk Claude had this to say:
   running them on the GPU greatly improves performance.
 * So like any good computer graphics engineer, I made a DSL! 
 
-* Example: 
+### SBrush DSL — example
 
 ```
 @brush("draw")
@@ -79,12 +83,12 @@ brush Draw {
     v.co += surfaceNo * s * radius * 0.5;
   }
 }
-
 ```
 
 ### I had Claude do it
 
 Actually I had Claude create it:
+
 * I asked Claude to redesign a DSL that supported autodiff and could (eventually)
   be extended to meet all of our compute needs for sculpt brush evaluation.
 * No problem for Claude 
@@ -99,12 +103,11 @@ Actually I had Claude create it:
   - Another one more typically used for compiling to Vulkan
 * This was done to be absolutely sure the testing environment was correct to real-world use.
 
-### Claude Is Really Good At Math
+### Sadly This Is Not Normal
 
-* This is actually pretty unusual.  Anthropic's models are not *that* great at creating testing
+* Anthropic's models are not *that* great at creating testing
   frameworks with such little (none!) developer input.
-* Claude is really, really good at math, and the reason it's good is because Anthropic has trained
-  their models to write really good *tests* for math-heavy code.
+* They are great at writing math tests however.
 
 ### Later Developments
 
@@ -122,15 +125,15 @@ Enough history for now, time to discuss practical engineering takeaways
 
 ### Agent Harnesses 
 
-* LLMS are useless by themselves, they require harnesses.
-* When people say 'Claude' they almost always means an official Anthropic harness.
+* LLMs are useless by themselves, they require harnesses.
+* When people say 'Claude' they almost always mean an official Anthropic harness.
 * An agent harness provides tools to the model it can use to do things on your computer.
 
 ### The Context Window
 
 * All LLMs have context windows.  
 * Range from 10s of thousands of tokens to millions.  
-* Current conventional wisdom is to use a window that's less then 500k in size
+* Current conventional wisdom is to use a window that's less than 500k in size
   - Avoids the dreaded 'middle rot' where the model starts ignoring tokens in the 
   middle of the context window.
   - Claude Code can be configured to use smaller context windows 
@@ -143,14 +146,19 @@ Enough history for now, time to discuss practical engineering takeaways
   - Tools
   - Custom skills (usually just the descriptions of them, models will load full skill files later).
   - Other instructions.
+
+### Basic Mental Model For Context (cont.)
+
 * A root 'memory' file is appended to the system prompt.  Depending on the harness this might be:
   - CLAUDE.md
   - AGENTS.md
-  - HERMES.md
   [CLAUDE: insert other examples if they exist]
 * This is a simple markdown file with links to other documents the model can use to build its context for the specific task it is doing
 * These documents might be code documentation, ai-generated plans, research reports, etc
-* When the agent is asked to do a task it will read CLAUDE.md, and follow any relevent links to useful documentation.
+
+### Basic Mental Model For Context (cont.)
+
+* When the agent is asked to do a task it will read CLAUDE.md, and follow any relevant links to useful documentation.
 * It may use a subagent to synthesize everything into a more detailed report 
 * Claude Opus and Fable will double-check this context against the current state of the codebase.  I think most 
   frontier models are trained to do this but I've not tested it.
@@ -158,6 +166,7 @@ Enough history for now, time to discuss practical engineering takeaways
 ### Other Bits of AGENTS.md
 
 Since AGENTS.md is simply appended to the system prompt it often has other useful bits for the model:
+
 * How to build the project
 * High-priority rules
 
@@ -172,19 +181,25 @@ Make the harness do it, e.g.:
 * 'Cleanup CLAUDE.md, extract verbose sections into their own linked documentation files`
 
 ### Write "High-Priority" Rules, Formatting is for Formatters
+
 Use high priority rules sparingly, code formatting and linting is the proper 
 purview of linters/formatters.
 
 #### Code Comment Rules 
+
 This is extremely important to prevent the models from cluttering your codebase 
-with verbose out of date comments that will poisons your context window.
+with verbose out of date comments that will poison your context window.
 
 I recommend these rules:
-* Do not use more then X lines for *permanent non-doc* comments except for extremely math-heavy comments.
+
+* Do not use more than X lines for *permanent non-doc* comments except for extremely math-heavy comments.
 * You will need an exception policy, e.g.:
   - You may write longer comments every X lines (e.g. 500).
   - Long comments must be approved by the user, you must keep track of them in 
     a file committed in the repo.
+
+#### Code Comment Rules (cont.)
+
 * Temp comments must start with `AGENTNOTE:` and be stripped before final PR submissions.
   - The single most important comment rule!  Agents love writing temporary code comments 
   in the course of executing a task, making them prepend a tag allows them to easily
@@ -201,7 +216,7 @@ time re-discovering it.  For example:
 
 #### Folder Structure
 
-I like to tell Claude to save documentation under the following folder hierachy:
+I like to tell Claude to save documentation under the following folder hierarchy:
 
 * docs/ - For design documents.
 * docs/research - For research reports
@@ -226,22 +241,60 @@ For particularly large tasks that require multiple plans you can create a task l
 This is often done after a high-level discussion with the model, possibly after it has
 created a research report.  For example:
 
-* [User]: I want to support X feature.  How would that work.
-* [Agent]: Maybe like this.  Should I write a report?
-* [User]: Do that.  Also create a master task list to keep track 
-          of plans in docs/plans/feature-task-list.md.
+* **User:** I want to support X feature.  How would that work.
+* **Agent:** Maybe like this.  Should I write a report?
+* **User:** Do that.  Also create a master task list to keep track 
+  of plans in docs/plans/feature-task-list.md.
 
-Claude Code unfortuntely has quirks surrounding task lists, but so long as you
+#### Task Lists (cont.)
+
+Claude Code unfortunately has quirks surrounding task lists, but so long as you
 tell it to save the task list in a specific place it should be fine (there's 
 actually a task list *tool* that operates in a single claude session, it's a whole thing).
 
-### Tests, Or Why You Should Not Use MCP Servers
+### Tests 
+
+* Frontier models are trained to always produce tests.
+* Getting them to produce reliably *useful* tests can be a challenge.
+* Let the model figure out *what* to test.
+  - you will add to that later :)
+* Inform the model about any debuggers or performance profiling tools on your system
+  (important for C/C++).
+* Remember that models (at least Claude Opus and Fable) are extremely good at writing 
+  math tests.
+
+### Tests — Headed, Not Headless
+
+* Make the model design a full integration test system early.
+* Models (or at least Anthropic ones) prefer to write headless tests.
+  - These are often useless.
+  - You will want to tell the model to convert these to headed integration tests.
+* Tell the model to set up a framework for full headed end-to-end integration tests, creating
+  any mocking necessary (and only that which is necessary).  You can use playwright, Electron,
+  NWJS, etc.
+
+### Tests — Make It Build Its Own Debugging Tools
+
+* Make the model think through and write the debugging tools it needs for its integration tests.
+* Let me say that again: tell the model to design any debugging tools it needs for the tests.
+  - You may have to give it ideas if it tries to give up (e.g. write an integration test with
+    playwright that you can connect to over Devtools CDP).
+  - Do not use the word 'skill' when you ask — see *Skills*, two slides on.
+* The 'keep a running lessons-learned guide in debugging.md' CLAUDE.md rule comes in handy here.
+* But don't build them as MCP servers. . .
+
+#### Do Not Write Debugging Tools as MCP Servers
 
 * MCP servers are an API layer that sits between an LLM and an API, they were invented 
   back when models were stupid.
-* Frontier models do not need this.
-  - Note: if you're in a high-security environment you may want to use MCPs to avoid triggering 
-    excessive AI model cleverness.
+* Frontier models do not need this.  They can write the tools they need directly in a variety of ways.
+
+#### Do Not Write Debugging Tools as MCP Servers (cont.)
+
+* Note: there are reasons to use MCP servers (like security)
+  - If you need to use an MCP server for your app make the testing framework use it.
+  - Do not *write* MCP servers specifically for your testing framework unless 
+    your security policies require it.
 * Claude Code has a chrome devtools MCP server.  The model happily told me it preferred to drive 
   Chromium apps over the debugging CDP protocol directly.
 
@@ -255,31 +308,18 @@ bash/python/JS script.  Skills come in two forms:
   - Can live anywhere in the codebase, usually linked to (or occasionally lives in) AGENTS.md.
   - Multiple 'skills' can live in a single markdown file (e.g. the debugging.md guide).
 
+#### Skills (cont.)
+
+When you tell an agent to create a tool for some task it will:
+
+* Write an informal skill it'll stash in some existing doc (e.g. CLAUDE.md or debugging.md) possibly 
+  including a helper script somewhere in the repo.
+* Ask you if you want it to create a formal skill.  You can usually force this by saying 'create this skill'
+  which is why you should never use the word 'skill' when asking the model to create tools unless you want it 
+  to create a formal skill.
+  
 For tests it's easier to use informal skills almost exclusively; this lets the agent 
 fix bugs in the skill, clone it to make specialized variants, etc.
-
-#### Creating Tests 
-
-The models are trained to always produced tests, but they aren't always very good at writing or debugging them.
-
-Tips for best results:
-
-* Let the model figure out *what* to test.
-  - you will add to that later :)
-* Ask the model to design any debugging skills/tools it needs for the tests (do not use the word 'skill'
-  however).
-* Inform the model about any debuggers or performance profiling tools on your system (important for C/C++).
-* Tell the model to set up a framework for full headed end-to-end integration tests, creating any mocking necassary.
-  (and only that which is necasssary).  You can use playwright, Electron, NWJS, etc.
-* The agent (or at least Claude Code) will prefer to write headless tests.  When these tests turn out to be useless
-  tell the model to redo them as full integration tests.
-* Remember that models (at least Claude Opus and Fable) are extremely good at writing 
-  math tests.
-
-#### Debugging Tests
-
-Let me say that again: tell the model to design any debugging tools it needs for the tests.  You may have to give 
-it ideas if it tries to give up (e.g. write an integration test with playwright that you can connect to over Devtools CDP).
 
 ### Refactoring
 
@@ -287,28 +327,37 @@ Models are fairly good at refactoring (including across git submodule boundaries
 
 An example refactoring run:
 
-* [User]: I've noticed there's a bunch of duplicate code inside the consumers of this API.
-* [Model]: You're right.  Here are all the places this is happening
-
-* [User]: The duplicated code really belongs in the API itself.  Write a plan to do this.
+* **User:** I've noticed there's a bunch of duplicate code inside the consumers of this API.
+* **Model:** You're right.  Here are all the places this is happening
+* **User:** The duplicated code really belongs in the API itself.  Write a plan to do this.
 
 . . .Or:
 
-* [User]: The duplicated code really belongs in the API itself.  Move it inside the API.
+* **User:** The duplicated code really belongs in the API itself.  Move it inside the API.
 
 ### You Don't Always Want To Plan
 
-* If you want the agent to iterate more then it would with normal plans you can directly order it to 
+* If you want the agent to iterate more than it would with normal plans you can directly order it to 
   do a task.  
-* Claude Code is extremely good at gauging the complexity and creating minimal plans when necassary.
+* Claude Code is extremely good at gauging the complexity and creating minimal plans when necessary.
 * Other harnesses may require explicit instructions, e.g. 'do X refactor, work in an iterative manner 
   updating your plan as you go along, keep me in the loop.'
- 
 
+<!-- ===========================================================================
+PREP NOTES — not rendered. Freeform; nothing parses this block.
 
+~45 min · mixed technical audience · ~41 slides (31 sections, 10 split for overflow)
 
+Sourced from real artifacts in path.ux / fairmotion / mathl / noise_fractal_stuff /
+pigment-painter / sculptcore / webgl-app-framework.
 
+Slide model: every ### / #### header starts a new slide (pandoc --slide-level=4).
+Sections too long for one slide are continued with a "(cont.)" header.
 
-
-
-
+TODO:
+[ ] add section on selecting models and model effort.
+[ ] add example/demo section.
+[ ] explain out-of-repo memory files that live in the user folder's .claude folder
+[ ] fill the three [CLAUDE: ...] placeholders.
+[ ] write a closing slide — the talk currently stops rather than ends.
+=========================================================================== -->

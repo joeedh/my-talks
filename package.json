@@ -1,0 +1,14 @@
+{
+  "name": "talks",
+  "private": true,
+  "description": "Talk slideshows. Markdown -> reveal.js via pandoc. See build.py.",
+  "scripts": {
+    "build": "python build.py",
+    "serve": "python build.py --serve",
+    "pdf": "python build.py --pdf",
+    "site": "python build.py --site --pdf"
+  },
+  "devDependencies": {
+    "reveal.js": "^5.1.0"
+  }
+}
