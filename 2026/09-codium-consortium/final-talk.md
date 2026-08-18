@@ -8,12 +8,23 @@ date: "Codium Consortium · September 2026"
      Don't put them up here: anything between the YAML block and the first
      header becomes a blank slide, and YAML rejects freeform text like "[ ]:". -->
 
+## Title Page 
+[CLAUDE: insert slide-front-page.jpg here]
+
+## About the Front Page 
+
+I uploaded this talk to Google Gemini and told it to "create a diagram inspired by this talk".
+
 ## Personal History With Agentic AI
 
 * First started using agentic AI in March of this year.
 * JS to TS porting
 * Sculptcore
 * Visual novel creator
+
+## Briefly Demo Sculptcore 
+
+## Briefly Demo Visual Novel Creator
 
 ### JS to TS porting
 
@@ -119,15 +130,40 @@ Actually I had Claude create it:
   - modify blender's source code to make writing said addon possible.
   - . . .and more!
   
-## A Break For Engineering!
+## Practical Software Engineering
 
 Enough history for now, time to discuss practical engineering takeaways
+
+There's a basic ai project template generator at:
+
+https://github.com/joeedh/ai-quicktests
+
+CLAUDE: create and embedd a QR code for the above link 
+the demo QR code should be shown on the bottom right corner 
+of all successive slides along with the caption 'Demo'.
+
+### Set up demo 
+
+I'll be setting up a demo making a simple puzzle fighter game.  Note: for the sake 
+of speed I'll being Sonnet with low effort level, a frontier model like Opus or even
+Sonnet on high effort will give much (much!) better results.
+
+### A Note On Chromium debugging
+
+* Claude has multiple means of debugging JS-based apps served in a chromium shell.
+* If you don't like the solution it's using, you can press escape to interrupt it
+  and tell it to use another approach.
 
 ### Agent Harnesses 
 
 * LLMs are useless by themselves, they require harnesses.
 * When people say 'Claude' they almost always mean an official Anthropic harness.
 * An agent harness provides tools to the model it can use to do things on your computer.
+
+## Resuming Sessions 
+
+* Your agent session should have a way to resume sessions 
+* Claude Code has `claude --resume` that lets you pick a session to resume.
 
 ### The Context Window
 
@@ -149,36 +185,36 @@ Enough history for now, time to discuss practical engineering takeaways
 
 ### Basic Mental Model For Context (cont.)
 
-* A root 'memory' file is appended to the system prompt.  Depending on the harness this might be:
-  - CLAUDE.md
-  - AGENTS.md
-  [CLAUDE: insert other examples if they exist]
-* This is a simple markdown file with links to other documents the model can use to build its context for the specific task it is doing
-* These documents might be code documentation, ai-generated plans, research reports, etc
+Most context (or memory) files are simple markdown file with links to other documents, important information the 
+model might, etc.  The context hierachy typically looks like this (in order of insertion into the prompt):
+
+* A root 'memory' file is appended to the system prompt.  Depending on the harness this might be
+  AGENTS.md, CLAUDE.md, GEMINI.md, etc
+* Some kind of external memory store associated with this project.  In Claude Code this is a markdown file:
+  - Flat list of links to other 'memory' markdown files
+  - Lives in the user's home folder
+  - Is associated with a specific repo
+* Basically there's context memory that's committed to the repo (AGENTS.md) and memory that's not.
 
 ### Basic Mental Model For Context (cont.)
 
-* When the agent is asked to do a task it will read CLAUDE.md, and follow any relevant links to useful documentation.
+* When the agent is asked to do a task it will read AGENTS.md, and follow any relevant links to useful documentation.
 * It may use a subagent to synthesize everything into a more detailed report 
 * Claude Opus and Fable will double-check this context against the current state of the codebase.  I think most 
   frontier models are trained to do this but I've not tested it.
-
-### Other Bits of AGENTS.md
-
-Since AGENTS.md is simply appended to the system prompt it often has other useful bits for the model:
-
-* How to build the project
-* High-priority rules
 
 ### How to Edit Your AGENTS.md Equivalent
 
 Make the harness do it, e.g.:
 
-* 'Create a CLAUDE.MD' (first run)
-* 'Make sure CLAUDE.md is up to date'
-* 'Add this rule to CLAUDE.md'
-* 'Make sure CLAUDE.md links to the documentation'
-* 'Cleanup CLAUDE.md, extract verbose sections into their own linked documentation files`
+* 'Create a AGENTS.MD' (first run)
+* 'Make sure AGENTS.md is up to date'
+* 'Add this rule to AGENTS.md'
+* 'Make sure AGENTS.md links to the documentation'
+* 'Cleanup AGENTS.md, extract verbose sections into their own linked documentation files`
+
+Replace 'AGENTS.md' with the proper name for your agent harness (many actually support AGENTS.md in addition
+to their own special filenames).
 
 ### Write "High-Priority" Rules, Formatting is for Formatters
 
@@ -188,7 +224,7 @@ purview of linters/formatters.
 #### Code Comment Rules 
 
 This is extremely important to prevent the models from cluttering your codebase 
-with verbose out of date comments that will poison your context window.
+with verbose out of date comments (and poison your agent's ability to accurately build context).
 
 I recommend these rules:
 
@@ -225,7 +261,20 @@ I like to tell Claude to save documentation under the following folder hierarchy
 Note that depending on the harness you may need to explicitly tell the model to save plans in the main repo;
 Claude Code for some reason does not, even though there are real benefits to doing so.
 
-### Plans -- What Are Plans?
+### DEMO
+
+Create an empty git repo, start claude.
+
+Prompt: 
+
+Create a CLAUDE.md with the following rules:
+permanent non-doc code comments cannot be more then 4 lines except every 500 lines;
+temporary code comments have no limit but must start with AGENTNOTE: for later 
+stripping; create a running debugging guide/lessons-learned in docs/debugging.md; 
+design documentation goes in docs/ research/reports in docs/research plans in 
+docs/plans; always write plans into the repo.
+
+### Plans
 
 Plans are well, that: plans created by agents.  
 
@@ -234,6 +283,30 @@ Plans are well, that: plans created by agents.
 * Models will often use plan files to store state 
   - This is why saving them in your repo is a good idea, that state is 
     often useful context for future plans.
+
+### DEMO 
+
+Prompt:
+
+Create a plan to write a puzzle fighter game.  Use native typescript tsgo,
+pnpm, eslint, prettier, serve with esbuild's http server.  Create an Electron
+shell.  The plan should make sure CLAUDE.md is up to date when it's done. 
+You may use either Playwright or the Electron shell for integration tests.
+
+#### Pressure Testing Plans 
+
+* Rigourously attempts to falsify plans/documents
+* Can be used to find and detect errors
+* Worth running inside of subagents
+* Worth creating a skill for this if your model doesn't support it natively
+  - To test, just ask your model how it interprets the phrase 'pressure test X plan'.
+
+For example:
+
+[User]: Use an agent to pressure test plan at X
+...model works 
+[Model]: Agent found X errors.  Want me to fold them into the plan?
+[User]: Yes
 
 #### Task Lists 
 
@@ -246,16 +319,24 @@ created a research report.  For example:
 * **User:** Do that.  Also create a master task list to keep track 
   of plans in docs/plans/feature-task-list.md.
 
-#### Task Lists (cont.)
+Make sure to tell the agent to save the task list to a file, some harnesses 
+support a temporary in-memory task list.
 
-Claude Code unfortunately has quirks surrounding task lists, but so long as you
-tell it to save the task list in a specific place it should be fine (there's 
-actually a task list *tool* that operates in a single claude session, it's a whole thing).
+### DEMO:
+Prompt: 
+
+* Use an agent to pressure test the plan, fold its recommendations into the plan.
+* Create a task list in docs/plans/tasklist.md:
+  - Add the first plan to it.
+  - Add a plan to write any necassary debugging code needed for you to drive the Electron
+    shell over CDP.
+* Write the second Plan
+* Execute the tasklist until completion
 
 ### Tests 
 
 * Frontier models are trained to always produce tests.
-* Getting them to produce reliably *useful* tests can be a challenge.
+* Getting them to reliably produce *useful* tests can be a challenge.
 * Let the model figure out *what* to test.
   - you will add to that later :)
 * Inform the model about any debuggers or performance profiling tools on your system
@@ -266,19 +347,19 @@ actually a task list *tool* that operates in a single claude session, it's a who
 ### Tests — Headed, Not Headless
 
 * Make the model design a full integration test system early.
+  - Can use Playwright, Electron, NWJS, etc.
 * Models (or at least Anthropic ones) prefer to write headless tests.
   - These are often useless.
-  - You will want to tell the model to convert these to headed integration tests.
-* Tell the model to set up a framework for full headed end-to-end integration tests, creating
-  any mocking necessary (and only that which is necessary).  You can use playwright, Electron,
-  NWJS, etc.
+  - When this happens have the model convert them to full integration tests.
+    - It's better to do this on a case by case basis instead of making the model only generate 
+	  integration tets.
+	- Full Chromium integration tests (whether Playwright or a shell like Electron) use quite a bit more system resources then headless ones.
 
 ### Tests — Make It Build Its Own Debugging Tools
 
 * Make the model think through and write the debugging tools it needs for its integration tests.
-* Let me say that again: tell the model to design any debugging tools it needs for the tests.
-  - You may have to give it ideas if it tries to give up (e.g. write an integration test with
-    playwright that you can connect to over Devtools CDP).
+  - You may have to give it ideas if it tries to give up (e.g. "write an integration test with
+    playwright that you can connect to over Devtools CDP").
   - Do not use the word 'skill' when you ask — see *Skills*, two slides on.
 * The 'keep a running lessons-learned guide in debugging.md' CLAUDE.md rule comes in handy here.
 * But don't build them as MCP servers. . .
@@ -307,13 +388,14 @@ bash/python/JS script.  Skills come in two forms:
 * Informal skills.  Raw instructions to the model.  
   - Can live anywhere in the codebase, usually linked to (or occasionally lives in) AGENTS.md.
   - Multiple 'skills' can live in a single markdown file (e.g. the debugging.md guide).
+* The running debugging guide from earlier slides is a collection of informal skills
 
 #### Skills (cont.)
 
-When you tell an agent to create a tool for some task it will:
+When you tell an agent to create a tool for some task it will either:
 
-* Write an informal skill it'll stash in some existing doc (e.g. CLAUDE.md or debugging.md) possibly 
-  including a helper script somewhere in the repo.
+* Write an informal skill in some existing doc (e.g. AGENT.md or debugging.md) possibly 
+  including a helper script.
 * Ask you if you want it to create a formal skill.  You can usually force this by saying 'create this skill'
   which is why you should never use the word 'skill' when asking the model to create tools unless you want it 
   to create a formal skill.
@@ -327,24 +409,100 @@ Models are fairly good at refactoring (including across git submodule boundaries
 
 An example refactoring run:
 
-* **User:** I've noticed there's a bunch of duplicate code inside the consumers of this API.
-* **Model:** You're right.  Here are all the places this is happening
-* **User:** The duplicated code really belongs in the API itself.  Write a plan to do this.
+**User:** I've noticed there's a bunch of duplicate code inside the consumers of this API.
+**Model:** You're right.  Here are all the places this is happening
+**User:** The duplicated code really belongs in the API itself.  Write a plan to do this.
 
-. . .Or:
+You can also simply command the model to do it directly:
 
-* **User:** The duplicated code really belongs in the API itself.  Move it inside the API.
+**User:** The duplicated code really belongs in the API itself.  Move it inside the API.
 
-### You Don't Always Want To Plan
+Note: modern agent harnesses will automatically create plans for complex tasks.
 
-* If you want the agent to iterate more than it would with normal plans you can directly order it to 
-  do a task.  
-* Claude Code is extremely good at gauging the complexity and creating minimal plans when necessary.
-* Other harnesses may require explicit instructions, e.g. 'do X refactor, work in an iterative manner 
-  updating your plan as you go along, keep me in the loop.'
+### You Don't Always Want To Use Plan Mode
+
+* Not using plan mode is sometimes easier to iterate on
+* Not needed for the immediate todo list workflow 
+
+### Immediate Todo Workflow 
+
+* Test your app.
+* Write a todo list of things to be done immediately
+* Have your agent execute it.
+* Repeat 
+
+### Immediate Todo Workflow [Contd]
+
+Use a checked markdown list.
+
+Example:
+```markdown 
+[ ]: Do X 
+[ ]: Do Y
+```
+
+### DEMO: 
+
+Create a todo list for the demo.
+
+### Working in Parallel: Git Worktrees
+
+Git worktrees are a lightway way to clone branches into new folders:
+
+* Let's you work on multiple things at once.
+* A branch can only be checked out in one worktree at a time
+* Claude's worktree support has a few simple but dire bugs 
+* To fix, write a prompt like so:
+
+### Worktree Fix prompt
+
+Update the global CLAUDE.md: 
+* worktrees must be created in sibling folders of the repo, NOT .claude/worktrees
+* if the exit worktree skill cannot delete a worktree directory it should check for any git file 
+watchers, typecheck servers or dev servers that hold the directory's lock and kill them.
+
+### Using worktrees (Claude Code)
+
+ [User]: In a new worktree do X
+ [User]: In a new worktree execute the plan at docs/plans/XXX.md
+
+When done:
+
+ [User]: merge into master and tear down the worktree
+ [User]: push to git and open a PR in github, then tear down the worktree
+
+### DEMO 
+
+Prompt:
+
+In a new worktree do the items in todo.md 
+
+### NWJS 
+
+If you find yourself needing to use NWJS (basically single-process Electronjs, it's easier to debug)
+you will have to tell Claude to jump through some hoops to allow multiple independent nwjs instances
+(e.g. for tests):
+
+  [User]: I want to be able to run multiple instances of the nwjs shell at once.  This will require 
+creating temporary lightweight Chromium profile directories.  Be absolutely sure those directories 
+are deleted on exit as they can add up to quite a lot of disk space.
+
+#### NWJS/Electron crashpad 
+
+You can also have Claude set up Chromium's automated crashpad system:
+
+  [User]: Make sure NWJS crashpad works and you are able to read its dump files.
+
+
+
+
+
+
 
 <!-- ===========================================================================
 PREP NOTES — not rendered. Freeform; nothing parses this block.
+
+Sections starting with DEMO cannot be split into multiple slides
 
 ~45 min · mixed technical audience · ~41 slides (31 sections, 10 split for overflow)
 
@@ -360,4 +518,7 @@ TODO:
 [ ] explain out-of-repo memory files that live in the user folder's .claude folder
 [ ] fill the three [CLAUDE: ...] placeholders.
 [ ] write a closing slide — the talk currently stops rather than ends.
+[ ] mention pressure testing plans 
+[ ] make section headers have a consistent title case style, use whatever the 
+    most common case styling.
 =========================================================================== -->
