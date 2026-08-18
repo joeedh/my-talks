@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+<!--
+  Skylighting has no HLSL definition, so ```hlsl fences render unstyled without
+  this file. It also carries the SBrush DSL's own vocabulary (brush / ctx /
+  vertex / @brush attributes), which is what the decks actually show.
+  build.py picks up every syntax/*.xml automatically.
+-->
+<language name="HLSL" version="1" kateversion="5.0" section="Sources"
+          extensions="*.hlsl;*.fx;*.sbrush" mimetype="" author="talks" license="MIT">
+  <highlighting>
+    <list name="keywords">
+      <item>brush</item><item>ctx</item><item>uniform</item><item>vertex</item>
+      <item>fragment</item><item>compute</item><item>inout</item><item>in</item>
+      <item>out</item><item>if</item><item>else</item><item>for</item>
+      <item>while</item><item>do</item><item>switch</item><item>case</item>
+      <item>default</item><item>return</item><item>continue</item><item>break</item>
+      <item>discard</item><item>struct</item><item>cbuffer</item><item>const</item>
+      <item>static</item><item>groupshared</item><item>register</item>
+      <item>true</item><item>false</item>
+    </list>
+    <list name="types">
+      <item>void</item><item>bool</item><item>int</item><item>uint</item>
+      <item>half</item><item>double</item>
+      <item>float</item><item>float2</item><item>float3</item><item>float4</item>
+      <item>int2</item><item>int3</item><item>int4</item>
+      <item>bool2</item><item>bool3</item><item>bool4</item>
+      <item>float2x2</item><item>float3x3</item><item>float4x4</item>
+      <item>matrix</item><item>vector</item><item>sampler</item>
+      <item>Texture2D</item><item>Texture3D</item><item>TextureCube</item>
+      <item>SamplerState</item><item>Vertex</item>
+    </list>
+    <contexts>
+      <context name="Normal" attribute="Normal Text" lineEndContext="#stay">
+        <keyword attribute="Keyword" String="keywords"/>
+        <keyword attribute="DataType" String="types"/>
+        <DetectChar attribute="Decorator" char="@"/>
+        <Detect2Chars attribute="Comment" char="/" char1="/" context="Comment1"/>
+        <Detect2Chars attribute="Comment" char="/" char1="*" context="Comment2"/>
+        <DetectChar attribute="String" char="&quot;" context="String"/>
+        <DetectChar attribute="String" char="'" context="Char"/>
+        <Float attribute="Float"/>
+        <Int attribute="Decimal"/>
+        <AnyChar attribute="Symbol" String="{}()[]+-*/%=&lt;&gt;!&amp;|^~?:;,."/>
+      </context>
+      <context name="Comment1" attribute="Comment" lineEndContext="#pop"/>
+      <context name="Comment2" attribute="Comment" lineEndContext="#stay">
+        <Detect2Chars attribute="Comment" char="*" char1="/" context="#pop"/>
+      </context>
+      <context name="String" attribute="String" lineEndContext="#pop">
+        <DetectChar attribute="String" char="&quot;" context="#pop"/>
+      </context>
+      <context name="Char" attribute="String" lineEndContext="#pop">
+        <DetectChar attribute="String" char="'" context="#pop"/>
+      </context>
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal"/>
+      <itemData name="Keyword"     defStyleNum="dsKeyword"/>
+      <itemData name="DataType"    defStyleNum="dsDataType"/>
+      <itemData name="Decorator"   defStyleNum="dsAttribute"/>
+      <itemData name="Decimal"     defStyleNum="dsDecVal"/>
+      <itemData name="Float"       defStyleNum="dsFloat"/>
+      <itemData name="String"      defStyleNum="dsString"/>
+      <itemData name="Comment"     defStyleNum="dsComment"/>
+      <itemData name="Symbol"      defStyleNum="dsOperator"/>
+    </itemDatas>
+  </highlighting>
+</language>

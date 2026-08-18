@@ -24,7 +24,7 @@ python build.py --serve         build, serve repo root on :8080, open browser
 python build.py --pdf           also emit dist/<slug>.pdf
 python build.py --standalone    inline every asset into one portable .html
 python build.py --site --pdf    every talk + index.html, exactly what CI publishes
-python build.py --talk 2027/03-somewhere --theme white --slide-level 4
+python build.py --talk 2027/03-somewhere --theme black --slide-level 4
 ```
 
 Requires `pandoc` on PATH. First run installs `reveal.js` into `node_modules/`
@@ -84,6 +84,8 @@ goes missing the site still builds, just without PDFs.
 .github/workflows/pages.yml   build + deploy to GitHub Pages
 build.py              the whole build; argparse CLI, no config file
 reveal-after.html     reveal config + print fixes, injected via --include-after-body
+syntax/*.xml          extra skylighting language definitions, auto-loaded
+filters/inline-cpp.lua  highlights single-backtick spans as C++
 package.json          pins reveal.js; npm scripts just call build.py
 2026/09-codium-consortium/
   final-talk.md       the deck (YAML frontmatter -> title slide)
@@ -103,6 +105,58 @@ branched on `?print-pdf`:
 - **Printing:** `requestAnimationFrame` is redirected onto `setTimeout`, and the
   `Reveal.configure()` call above is skipped entirely. Both are load-bearing —
   see below.
+- **Appearance:** the palette and type overrides live here too, in a `<style>`
+  block, because pandoc's reveal template forwards only `theme` and won't carry
+  arbitrary CSS.
+
+## Look and feel
+
+The deck is `--theme white` (reveal's, self-hosting Source Sans Pro) with the
+palette and fonts overridden in `reveal-after.html`:
+
+- **Paper, not a lightbox.** `#faf8f5` ground with `#33383d` ink, ~11:1. Reveal's
+  own white theme pairs `#fff` with `#222`, which is close to as harsh as the
+  white-on-black it replaced. Pure black on pure white is 21:1 and glares.
+- **System font stack** — Segoe UI Variable / Segoe UI / `-apple-system` /
+  `system-ui` for prose, and `ui-monospace` / Cascadia Code / SF Mono / Consolas
+  for code. Nothing is downloaded, so nothing degrades when presenting offline.
+  The tradeoff is that a Mac podium renders a different face than your laptop.
+- **`--highlight` must stay a light style** (`tango`, `pygments`, `kate`) to match.
+  `breezedark` is a dark syntax theme and is unreadable on this ground.
+- The title slide keeps its dark cover art (`data-background-color` in the deck's
+  frontmatter) — that is deliberate, not a leftover from the dark theme.
+
+Only reveal's `white`, `white-contrast`, `black`, `black-contrast` and `serif`
+themes work offline. **`simple`, `solarized`, `beige` and `sky` `@import` Lato and
+friends from Google Fonts** and silently fall back to a system face with no
+network — exactly the condition you present in. Don't reach for them.
+
+## Syntax highlighting
+
+Fenced blocks are highlighted by pandoc/skylighting (`--syntax-highlighting`,
+default `tango`). ```` ```ts ````, ```` ```cpp ````, ```` ```python ```` and
+anything else `pandoc --list-highlight-languages` lists just work.
+
+For a language skylighting doesn't ship, drop a KDE-format definition in
+`syntax/`. `build.py` passes every `syntax/*.xml` as `--syntax-definition`, so a
+new language needs no code change. `syntax/hlsl.xml` is the worked example — it
+also carries the SBrush DSL's own keywords (`brush`, `ctx`, `vertex`, `@brush`).
+
+**Inline single-backtick spans are lexed as C++** by `filters/inline-cpp.lua`,
+which pandoc otherwise leaves as plain text. It renders each span through
+skylighting and splices the token markup back in, so inline and fenced code share
+one theme and it survives `--pdf` and `--standalone` with no client-side JS.
+
+Give a span any class to opt out or pick another language:
+
+```markdown
+`claude --resume`{.text}      plain
+`x = 1`{.python}              highlighted as python
+```
+
+Reach for `{.text}` whenever C++ lexing misreads something — `-fdelayed-template-parsing`
+colors `template` as a keyword, and a `'...'` inside a span reads as an unterminated
+char literal.
 
 ## Gotchas (each one cost real debugging time)
 
@@ -125,12 +179,30 @@ branched on `?print-pdf`:
   Chrome profile by default.
 - **`--window-size` must match the deck's width/height** (1280x800), or reveal's
   print layout collapses.
+- **Pandoc only emits the highlighting stylesheet when the AST holds a highlighted
+  *block*.** A deck with inline code and no fences would get colorless spans, so
+  `inline-cpp.lua` appends a hidden empty `cpp` block in that case. It has to be a
+  real `CodeBlock` — a `RawBlock` of pre-rendered HTML does not trigger it.
+- **Framing `div.sourceCode` *and* `pre` draws a box inside a box.** Pandoc wraps
+  every highlighted block in `div.sourceCode > pre.sourceCode`, so the background
+  and border belong on the wrapper only — `pre:not(.sourceCode)` catches the
+  unhighlighted ones.
 - `build.py` warns on slides that render with a heading and no body — usually an
   authoring slip like the one above, worth investigating rather than ignoring.
 
 ## Verifying a change
 
-`python build.py` prints the section count (currently 43) and any blank-slide
+`python build.py` prints the section count (currently 62) and any blank-slide
 warnings. For PDF changes check page count, not just exit status:
-`python build.py --pdf` should report ~41 pages / ~185 KB. A 1-page PDF means
-the print layout silently failed.
+`python build.py --pdf` should report ~59 pages / ~2.9 MB. A 1-page PDF means
+the print layout silently failed. (The deck was ~185 KB before the cover image
+went in; the bulk is that one JPEG.)
+
+For highlighting changes, check the emitted classes rather than eyeballing:
+
+```
+grep -o 'class="sourceCode[^"]*"' dist/2026-09-codium-consortium.html | sort | uniq -c
+```
+
+A bare `class="sourceCode"` on a `<pre>` means the language was not recognized
+and the block rendered unstyled.

@@ -2,14 +2,15 @@
 title: "Software Engineering With AI"
 author: "Joe Eagar"
 date: "Codium Consortium · September 2026"
+title-slide-attributes:
+  data-background-image: "slide-front-page.jpg"
+  data-background-size: "contain"
+  data-background-color: "#0b1020"
 ---
 
 <!-- PREP NOTES AND TODOS ARE AT THE BOTTOM OF THIS FILE.
      Don't put them up here: anything between the YAML block and the first
      header becomes a blank slide, and YAML rejects freeform text like "[ ]:". -->
-
-## Title Page 
-[CLAUDE: insert slide-front-page.jpg here]
 
 ## About the Front Page 
 
@@ -49,7 +50,7 @@ I uploaded this talk to Google Gemini and told it to "create a diagram inspired 
 * I had already coded a basic API to bridge C++ and TS.  I had Claude Code:
   - Add method/constructor binding.  
   - Fix the code that generates typescript interface files.
-  - Remove the bridge's prior dependence on clang's `-fdelayed-template-parsing` flag.
+  - Remove the bridge's prior dependence on clang's `-fdelayed-template-parsing`{.text} flag.
 * A generic method binding system is a nasty bit of C++ template code.  No problem for Claude.
 
 ### Claude's Perspective
@@ -59,7 +60,7 @@ For what it's worth, when creating notes for this talk Claude had this to say:
 #### Why it worked — and the honest reason
 
 * Genuinely hard: type-erased thunks `void(*)(void*, void**, void*)` where every parameter kind is read differently from a variadic pack; class templates with **string-literal NTTPs** reflected into TS generics (`BuiltinAttr<float3, '.face.normal'>`)
-* The whole thing compiled only under `-fdelayed-template-parsing` — a clang MSVC-compat extension papering over two-phase lookup against an open overload set. The fix migrated ~124 call sites to a `Binder<T>::bind()` customization point.
+* The whole thing compiled only under `-fdelayed-template-parsing`{.text} — a clang MSVC-compat extension papering over two-phase lookup against an open overload set. The fix migrated ~124 call sites to a `Binder<T>::bind()` customization point.
 * **The AI wrote the method and constructor binders. Best result in the talk.**
 
 #### Why it worked (cont.)
@@ -83,7 +84,7 @@ For what it's worth, when creating notes for this talk Claude had this to say:
 
 ### SBrush DSL — example
 
-```
+```hlsl
 @brush("draw")
 brush Draw {
   ctx float3 surfaceNo;
@@ -119,16 +120,17 @@ Actually I had Claude create it:
 * Anthropic's models are not *that* great at creating testing
   frameworks with such little (none!) developer input.
 * They are great at writing math tests however.
+* We'll come back to this later 
 
 ### Later Developments
 
-* I had previously prototyped a system to dynamically subdivide meshes 
-  during sculpting while preserving UVs.  Claude was able to do it with around ~1 page of prompts in total.
-* I also used Claude to do a large number of other things:
-  - implement catmull-clark multiresolution sculpting.
-  - write a blender addon.
-  - modify blender's source code to make writing said addon possible.
-  - . . .and more!
+* Claude is shockingly good at implementing complicated math & graph stuff 
+  from very brief prompts.
+  - A UV-preserving polygonal mesh remesher
+  - Polynomial clothoids
+* I had Claude create a Blender addon for sculptcore; I used it to create:
+  - A fork of Blender with minimal changes to its addon API.
+  - Github workflows to compile and publish builds.
   
 ## Practical Software Engineering
 
@@ -163,7 +165,7 @@ Sonnet on high effort will give much (much!) better results.
 ## Resuming Sessions 
 
 * Your agent session should have a way to resume sessions 
-* Claude Code has `claude --resume` that lets you pick a session to resume.
+* Claude Code has `claude --resume`{.text} that lets you pick a session to resume.
 
 ### The Context Window
 
@@ -236,7 +238,7 @@ I recommend these rules:
 
 #### Code Comment Rules (cont.)
 
-* Temp comments must start with `AGENTNOTE:` and be stripped before final PR submissions.
+* Temp comments must start with `AGENTNOTE:`{.text} and be stripped before final PR submissions.
   - The single most important comment rule!  Agents love writing temporary code comments 
   in the course of executing a task, making them prepend a tag allows them to easily
   grep the codebase to strip them.
@@ -303,10 +305,15 @@ You may use either Playwright or the Electron shell for integration tests.
 
 For example:
 
-[User]: Use an agent to pressure test plan at X
+**User:** Use an agent to pressure test plan at X
 ...model works 
-[Model]: Agent found X errors.  Want me to fold them into the plan?
-[User]: Yes
+**Model:** Agent found X errors.  Want me to fold them into the plan?
+**User:** Yes
+
+#### Pressure Testing Plans 
+
+Claude Code doesn't always ask you if you want to apply the pressure testing results.
+Do not assume it has done so.
 
 #### Task Lists 
 
@@ -384,7 +391,7 @@ Prompt:
 You do want to use skills.  A skill is a markdown file that tells the model what to do, often associated with a simple 
 bash/python/JS script.  Skills come in two forms:
 
-* Formal skills.  These are loaded by the agent harness and usually invoked with `/[skill-name]`.
+* Formal skills.  These are loaded by the agent harness and usually invoked with `/[skill-name]`{.text}.
 * Informal skills.  Raw instructions to the model.  
   - Can live anywhere in the codebase, usually linked to (or occasionally lives in) AGENTS.md.
   - Multiple 'skills' can live in a single markdown file (e.g. the debugging.md guide).
@@ -463,13 +470,13 @@ watchers, typecheck servers or dev servers that hold the directory's lock and ki
 
 ### Using worktrees (Claude Code)
 
- [User]: In a new worktree do X
- [User]: In a new worktree execute the plan at docs/plans/XXX.md
+**User:** In a new worktree do X
+**User:** In a new worktree execute the plan at docs/plans/XXX.md
 
 When done:
 
- [User]: merge into master and tear down the worktree
- [User]: push to git and open a PR in github, then tear down the worktree
+**User:** merge into master and tear down the worktree
+**User:** push to git and open a PR in github, then tear down the worktree
 
 ### DEMO 
 
@@ -483,7 +490,7 @@ If you find yourself needing to use NWJS (basically single-process Electronjs, i
 you will have to tell Claude to jump through some hoops to allow multiple independent nwjs instances
 (e.g. for tests):
 
-  [User]: I want to be able to run multiple instances of the nwjs shell at once.  This will require 
+**User:** I want to be able to run multiple instances of the nwjs shell at once.  This will require 
 creating temporary lightweight Chromium profile directories.  Be absolutely sure those directories 
 are deleted on exit as they can add up to quite a lot of disk space.
 
@@ -491,7 +498,7 @@ are deleted on exit as they can add up to quite a lot of disk space.
 
 You can also have Claude set up Chromium's automated crashpad system:
 
-  [User]: Make sure NWJS crashpad works and you are able to read its dump files.
+**User:** Make sure NWJS crashpad works and you are able to read its dump files.
 
 
 

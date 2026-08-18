@@ -42,3 +42,69 @@
   else Reveal.on('ready', apply);
 })();
 </script>
+
+<style>
+/* The cover art already carries the title, author and venue, so the pandoc
+   template's own text would just sit on top of it. */
+#title-slide[data-background-image] > * { display: none }
+
+/* ---- palette -------------------------------------------------------------
+   The deck reads as paper, not as a lightbox. reveal's white theme pairs #fff
+   with #222, which is nearly as harsh as the white-on-black it replaced; a warm
+   off-white ground and dark slate ink land around 11:1 -- still well past AA at
+   projector distance, without the glare. */
+:root {
+  --r-background-color: #faf8f5;
+  --r-main-color:       #33383d;
+  --r-heading-color:    #1f2933;
+  --r-link-color:       #2a6496;
+  --r-link-color-hover: #4a90c4;
+  --r-selection-background-color: #d5e3f0;
+  --r-selection-color:  #1f2933;
+}
+.reveal, .reveal .slides section { color: var(--r-main-color) }
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 { color: var(--r-heading-color) }
+
+/* ---- type ----------------------------------------------------------------
+   Source Sans Pro is narrow and small on the eye at the back of a room. These
+   are faces already installed on the machine, so nothing is downloaded and
+   nothing breaks when presenting offline. */
+:root {
+  --r-main-font: "Segoe UI Variable Text", "Segoe UI", -apple-system,
+                 BlinkMacSystemFont, system-ui, "Helvetica Neue", Arial, sans-serif;
+  --r-heading-font: "Segoe UI Variable Display", "Segoe UI", -apple-system,
+                    BlinkMacSystemFont, system-ui, "Helvetica Neue", Arial, sans-serif;
+  --r-code-font: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas,
+                 "DejaVu Sans Mono", monospace;
+  --r-main-font-size: 40px;
+}
+.reveal .slides section { line-height: 1.35 }
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 { letter-spacing: -0.01em }
+
+/* ---- code ----------------------------------------------------------------
+   The `tango` highlight style grounds blocks in #f8f8f8, which is invisible
+   against the page. Give them their own tint and a hairline edge instead. */
+.reveal div.sourceCode, .reveal pre:not(.sourceCode) {
+  background: #f2efe9;
+  border: 1px solid #e2ddd4;
+  border-radius: 4px;
+  box-shadow: none;
+}
+/* pandoc wraps highlighted blocks in div.sourceCode > pre.sourceCode; framing
+   both draws a box inside a box. */
+.reveal div.sourceCode pre {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  margin: 0;
+}
+.reveal pre code { background: transparent; padding: 12px 16px }
+
+/* Highlighted inline spans are bare <code>, not <pre><code>, so reveal's
+   code styling doesn't reach them. Token colors come from pandoc's own
+   `code span.*` rules, the same ones the fenced blocks use. */
+.reveal code.sourceCode, .reveal p > code, .reveal li > code {
+  font-family: var(--r-code-font);
+  font-size: 0.9em;
+}
+</style>

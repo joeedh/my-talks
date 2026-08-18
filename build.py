@@ -60,6 +60,17 @@ def ensure_reveal() -> Path:
 
 
 # ---------------------------------------------------------------- build
+ASSET_SUFFIXES = {".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"}
+
+
+def copy_talk_assets(talk_dir: Path, dist: Path) -> None:
+    """Images live beside the deck but are referenced by bare filename, which the
+    browser resolves relative to dist/. Copy them flat so both agree."""
+    for f in talk_dir.iterdir():
+        if f.is_file() and f.suffix.lower() in ASSET_SUFFIXES:
+            shutil.copy2(f, dist / f.name)
+
+
 def build_html(args: argparse.Namespace, reveal: Path, talk: str) -> Path:
     src = ROOT / talk / args.deck
     if not src.is_file():
@@ -90,6 +101,15 @@ def build_html(args: argparse.Namespace, reveal: Path, talk: str) -> Path:
         f"--include-after-body={ROOT / 'reveal-after.html'}",
         f"--output={out}",
     ]
+
+    # Languages skylighting doesn't ship (see syntax/hlsl.xml). Directory-driven,
+    # so a new language is a new file and no code change.
+    cmd += [f"--syntax-definition={f}" for f in sorted((ROOT / "syntax").glob("*.xml"))]
+
+    # Highlights single-backtick spans, which pandoc otherwise leaves as plain text.
+    cmd += [f"--lua-filter={ROOT / 'filters' / 'inline-cpp.lua'}"]
+
+    copy_talk_assets(ROOT / talk, dist)
 
     if args.standalone:
         # inline every asset so the deck is a single portable file
@@ -163,18 +183,18 @@ def copy_reveal_runtime(reveal: Path) -> None:
 
 
 INDEX_CSS = """
-:root { color-scheme: dark }
-body { margin: 0; padding: 4rem 1.5rem; background: #191919; color: #eee;
+:root { color-scheme: light }
+body { margin: 0; padding: 4rem 1.5rem; background: #faf8f5; color: #33383d;
        font: 16px/1.6 -apple-system, "Segoe UI", system-ui, sans-serif; }
 main { max-width: 46rem; margin: 0 auto }
 h1 { font-weight: 600; letter-spacing: -.02em; margin: 0 0 .25rem }
-.sub { color: #888; margin: 0 0 3rem }
-.talk { padding: 1.25rem 0; border-top: 1px solid #333 }
+.sub { color: #6b7280; margin: 0 0 3rem }
+.talk { padding: 1.25rem 0; border-top: 1px solid #e2ddd4 }
 .talk h2 { font-size: 1.15rem; font-weight: 600; margin: 0 0 .2rem }
-.talk h2 a { color: #eee; text-decoration: none }
-.talk h2 a:hover { color: #42affa }
-.meta { color: #888; font-size: .9rem; margin: 0 0 .6rem }
-.links a { color: #42affa; text-decoration: none; font-size: .9rem; margin-right: 1.25rem }
+.talk h2 a { color: #1f2933; text-decoration: none }
+.talk h2 a:hover { color: #2a6496 }
+.meta { color: #6b7280; font-size: .9rem; margin: 0 0 .6rem }
+.links a { color: #2a6496; text-decoration: none; font-size: .9rem; margin-right: 1.25rem }
 .links a:hover { text-decoration: underline }
 """
 
@@ -317,8 +337,8 @@ def main() -> int:
     )
     p.add_argument("--talk", default="2026/09-codium-consortium")
     p.add_argument("--deck", default="final-talk.md")
-    p.add_argument("--theme", default="black", help="reveal theme (black, white, league, ...)")
-    p.add_argument("--highlight", default="breezedark", help="pandoc syntax highlighting style")
+    p.add_argument("--theme", default="white", help="reveal theme (white, black, league, ...)")
+    p.add_argument("--highlight", default="tango", help="pandoc syntax highlighting style")
     p.add_argument("--slide-level", type=int, default=4)
     p.add_argument("--port", type=int, default=8080)
     p.add_argument("--pdf", action="store_true", help="also emit a PDF")
