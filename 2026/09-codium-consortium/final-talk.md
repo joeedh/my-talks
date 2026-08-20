@@ -244,6 +244,15 @@ I recommend these rules:
   grep the codebase to strip them.
 * Temp comments have no line limit.
 
+#### Comment Prose 
+
+* If you have an existing codebase Claude will use the prose 
+  style of its comments.
+* If not the prose style drift into Yoda-like statements the model
+  finds more convientent but are unreadable to humans.
+* If this happens just complain to the model and have it insert a 
+  comment style rule into claude.md and fix all outstanding comments.
+
 #### Debugging
 
 It's important the model writes down how it debugged something so it can remember later
