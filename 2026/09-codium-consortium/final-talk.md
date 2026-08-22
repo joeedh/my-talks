@@ -16,24 +16,13 @@ title-slide-attributes:
 
 * First started using agentic AI in March of this year.
 * JS to TS porting
-* Sculptcore
-* FaberLeaf
-* Visual novel creator
 
-## Briefly Demo Sculptcore 
+### Things Did Not Start Well
 
-## Briefly Demo Visual Novel Creator
-
-### JS to TS porting
-
-*  First experience with AI (Claude Code) was porting JS code to TS.  It was not a good experience:
-  - Anthropic's models are trained to port JS->TS one file at a time, driving all type errors to zero 
-    before going onto the next one.
-  - This produced hilariously garbage code (see next slide).
-  - Long story short, I told Claude Code to:
-    - Add types to all files at once with its own reasoning alone.
-	- Read the files again to double check its work.
-	- Finally drive typecheck errors to zero.
+* My first task for Claude was to port a large amount of Javascript code to Typescript.
+* Anthropic's models are trained to port JS->TS one file at a time, driving all type errors to zero 
+before going onto the next one.
+* This produced hilariously garbage code (see next slide).
 
 #### Hilariously Garbage Code 
 
@@ -46,33 +35,24 @@ class Bleh {
 }
 ```
 
+### The solution
+* I had Claude Code create a Javascript to Typescript conversion skill that worked in stages:
+	- Adds types to all files with the model's own reasoning; it is not allowed to invoke the typechecker.
+	- Read the files again to double check its work.
+	- Finally drive typecheck errors to zero.
+
 ### Sculptcore
 
-* Sculptcore is a digital sculpting system I designed years ago
+* Sculptcore: digital sculpting system I designed years ago.
 * Meant to be embedded in host 3D digital content creation (DCC) apps like Blender or Maya.
 * Includes bits of original research I had done for the Blender foundation (but never made it into 
   Blender).
-* Project stalled due to the sheer work involved
+* Project stalled due to the sheer work involved.
+* Used Claude Code heavily to finish the work 
 
-### TS<->C++ bridge
+## Briefly Demo Sculptcore 
 
-* I had already coded a basic API to bridge C++ and TS.  I had Claude Code:
-  - Add method/constructor binding.  
-  - Fix the code that generates typescript interface files.
-  - Remove the bridge's prior dependence on clang's `-fdelayed-template-parsing`{.text} flag.
-* A generic method binding system is a nasty bit of C++ template code.  No problem for Claude.
-
-### Claude's Perspective
-
-For what it's worth, when creating notes for this talk Claude had this to say:
-
-#### Why it worked — and the honest reason
-
-* Genuinely hard: type-erased thunks `void(*)(void*, void**, void*)` where every parameter kind is read differently from a variadic pack; class templates with **string-literal NTTPs** reflected into TS generics (`BuiltinAttr<float3, '.face.normal'>`)
-* The whole thing compiled only under `-fdelayed-template-parsing`{.text} — a clang MSVC-compat extension papering over two-phase lookup against an open overload set. The fix migrated ~124 call sites to a `Binder<T>::bind()` customization point.
-* **The AI wrote the method and constructor binders. Best result in the talk.**
-
-### SBrush DSL
+### Example of What Frontiers Model Can Do: SBrush DSL
 
 * Sculptcore is designed to execute brush strokes on both the CPU and the GPU.  
 * Some sculpt brushes have exponential falloffs that never hit zero anywhere in the mesh,
@@ -94,13 +74,13 @@ brush Draw {
 }
 ```
 
-### I had Claude do it
+### SBrush DSL [contd]
 * I've implemented enough compilers in my life
-* Asked Claude to design a DSL that supported autodiff and could (eventually)
+* So I asked Claude to design a DSL that supported autodiff and could (eventually)
   be extended to meet all of our compute needs for sculpt brush evaluation.
-* No problem for Claude 
+* The result was impressive.
 
-### What Claude did 
+### Claude
 
 * Wrote a parser and code emitters for C++ and WGSL.
 * Created--without me asking--a sophisticated testing framework to test 
@@ -110,33 +90,56 @@ brush Draw {
 ### Sadly This Is Not Normal
 
 * Anthropic's models are not *that* great at creating testing
-  frameworks with such little (none!) developer input.
-* They are great at writing math tests however.
-* We'll come back to this later 
-  
+  frameworks with such little developer input.
+* Math-heavy tasks (including math-heavy language compilers) are an exception.
+* We'll come back to this later.
+
+## Visual Novel Creator
+
+Generative AI pipeline for creating visual novels, created from scratch with Claude Code. 
+
+A user (or an AI agent) writes:
+* Story notes (e.g. locations, characters, history)
+* Scene scripts
+
+The app generates AI artwork with google gemini.  Artwork 
+form a tree of reference images, prior reference images are 
+fed to gemini for reference (e.g. portrat -> character model sheet -> shot).
+
+Human review of assets is built into the app. 
+
+## Briefly Demo Visual Novel Creator
+
 ## Practical Software Engineering
 
-Enough history for now, time to discuss practical engineering takeaways
+Enough history for now.  Time for the good part.
 
 There's a basic ai project template generator at:
 
 https://github.com/joeedh/ai-quicktests
 
-CLAUDE: create and embedd a QR code for the above link 
+[CLAUDE: create and embedd a QR code for the above link 
 the demo QR code should be shown on the bottom right corner 
-of all successive slides along with the caption 'Demo'.
+of all successive slides along with the caption 'Demo'.]
+
+### Terminology:
+
+* Agent Harness - the software that interfaces with the AI model.
+* AGENTS.md: the root context memory file, may also be called CLAUDE.MD 
+             GEMINI.MD etc depending on your specific harness.
+* The model: the active large language model 
+
+### Interrupting The Model
+
+* You can interrupt coding agents with 'escape' or by pressing a stop button.
+* Ask the model questions, or give it further instructions.
+* Type 'continue'
 
 ### Set up demo 
 
 I'll be setting up a demo making a simple puzzle fighter game.  Note: for the sake 
 of speed I'll being Sonnet with low effort level, a frontier model like Opus or even
-Sonnet on high effort will give much (much!) better results.
-
-### A Note On Chromium debugging
-
-* Claude has multiple means of debugging JS-based apps served in a chromium shell.
-* If you don't like the solution it's using, you can press escape to interrupt it
-  and tell it to use another approach.
+Sonnet on high effort will give much better results.
 
 ### Agent Harnesses 
 
