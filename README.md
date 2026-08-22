@@ -2,6 +2,8 @@
 
 Talk slideshows. Markdown in, reveal.js out, via pandoc.
 
+Published site: https://joeedh.github.io/my-talks/
+
 ```
 python build.py --serve         # build + open at localhost:8080
 python build.py --pdf           # also emit dist/<talk>.pdf

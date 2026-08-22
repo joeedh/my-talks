@@ -118,9 +118,7 @@ There's a basic ai project template generator at:
 
 https://github.com/joeedh/ai-quicktests
 
-[CLAUDE: create and embedd a QR code for the above link 
-the demo QR code should be shown on the bottom right corner 
-of all successive slides along with the caption 'Demo'.]
+![](qr-ai-quicktests.png){width=40%}
 
 ### Terminology:
 
@@ -134,12 +132,6 @@ of all successive slides along with the caption 'Demo'.]
 * You can interrupt coding agents with 'escape' or by pressing a stop button.
 * Ask the model questions, or give it further instructions.
 * Type 'continue'
-
-### Set up demo 
-
-I'll be setting up a demo making a simple puzzle fighter game.  Note: for the sake 
-of speed I'll being Sonnet with low effort level, a frontier model like Opus or even
-Sonnet on high effort will give much better results.
 
 ### Agent Harnesses 
 
@@ -294,11 +286,14 @@ Create an empty git repo, start claude.
 Prompt: 
 
 Create a CLAUDE.md with the following rules:
-permanent non-doc code comments cannot be more then 4 lines except every 500 lines;
-temporary code comments have no limit but must start with AGENTNOTE: for later 
-stripping; create a running debugging guide/lessons-learned in docs/debugging.md; 
-design documentation goes in docs/ research/reports in docs/research plans in 
-docs/plans; always write plans into the repo.
+* permanent non-doc code comments cannot be more then 4 lines except every 500 lines.
+* temporary code comments have no limit but must start with AGENTNOTE: for later stripping.
+* create a running debugging guide/lessons-learned in docs/debugging.md.
+* design documentation go in docs/
+* research and reports go in docs/research 
+* plans should always be saved to the repo and go in docs/plans
+* plans should be pressure tested with an agent and the results folded back into the plan 
+  after creation.
 
 ### Plans
 
@@ -314,10 +309,12 @@ Plans are well, that: plans created by agents.
 
 Prompt:
 
-Create a plan to write a puzzle fighter game.  Use native typescript tsgo,
-pnpm, eslint, prettier, serve with esbuild's http server.  Create an Electron
-shell.  The plan should make sure CLAUDE.md is up to date when it's done. 
-You may use either Playwright or the Electron shell for integration tests.
+Create a plan to write a tetris game:
+* Use native typescript tsgo, pnpm, eslint, prettier
+* serve with esbuild's http server.  
+* Create an Electron shell.  
+* plan should make sure CLAUDE.md is up to date when it's done. 
+* You may use either Playwright or the Electron shell for integration tests.
 
 #### Pressure Testing Plans 
 
@@ -337,7 +334,9 @@ For example:
 #### Pressure Testing Plans 
 
 Claude Code doesn't always ask you if you want to apply the pressure testing results.
-Do not assume it has done so.
+Do not assume it has done so, e.g.:
+
+**User:** Did you fold the pressure testing results into the plan?
 
 #### Task Lists 
 
@@ -354,28 +353,31 @@ Make sure to tell the agent to save the task list to a file, some harnesses
 support a temporary in-memory task list.
 
 ### DEMO:
+
+Use `/clear` to clear the claude conversation context.
+
 Prompt: 
 
-* Use an agent to pressure test the plan, fold its recommendations into the plan.
+* Use an agent to pressure test the plan.
 * Create a task list in docs/plans/tasklist.md:
   - Add the first plan to it.
   - Add a plan to write any necassary debugging code needed for you to drive the Electron
     shell over CDP.
-* Write the second Plan
-* Execute the tasklist until completion
+* Write the second Plan.
+* Execute the tasklist until completion.
 
 ### Tests 
 
 * Frontier models are trained to always produce tests.
 * Getting them to reliably produce *useful* tests can be a challenge.
 * Let the model figure out *what* to test.
-  - you will add to that later :)
+  - you will add to it later.
 * Inform the model about any debuggers or performance profiling tools on your system
   (important for C/C++).
-* Remember that models (at least Claude Opus and Fable) are extremely good at writing 
+* Models (at least Claude Opus and Fable) are extremely good at writing 
   math tests.
 
-### Tests — Headed, Not Headless
+### Tests [Contd]
 
 * Make the model design a full integration test system early.
   - Can use Playwright, Electron, NWJS, etc.
@@ -383,15 +385,15 @@ Prompt:
   - These are often useless.
   - When this happens have the model convert them to full integration tests.
     - It's better to do this on a case by case basis instead of making the model only generate 
-	  integration tets.
+	  integration tests.
 	- Full Chromium integration tests (whether Playwright or a shell like Electron) use quite a bit more system resources then headless ones.
 
-### Tests — Make It Build Its Own Debugging Tools
+### Build Debugging Tools
 
 * Make the model think through and write the debugging tools it needs for its integration tests.
   - You may have to give it ideas if it tries to give up (e.g. "write an integration test with
     playwright that you can connect to over Devtools CDP").
-  - Do not use the word 'skill' when you ask — see *Skills*, two slides on.
+  - Do not use the word 'skill' when you ask, more on that later.
 * The 'keep a running lessons-learned guide in debugging.md' CLAUDE.md rule comes in handy here.
 * But don't build them as MCP servers. . .
 
@@ -400,24 +402,19 @@ Prompt:
 * MCP servers are an API layer that sits between an LLM and an API, they were invented 
   back when models were stupid.
 * Frontier models do not need this.  They can write the tools they need directly in a variety of ways.
-
-#### Do Not Write Debugging Tools as MCP Servers (cont.)
-
-* Note: there are reasons to use MCP servers (like security)
-  - If you need to use an MCP server for your app make the testing framework use it.
-  - Do not *write* MCP servers specifically for your testing framework unless 
-    your security policies require it.
-* Claude Code has a chrome devtools MCP server.  The model happily told me it preferred to drive 
-  Chromium apps over the debugging CDP protocol directly.
-
+* It's better to let the models write their own debugging tools as either formal or informal skills (more on that in a bit).
+* Note: some organizations require MCP servers to be used for security reasons.
+  
 #### Skills 
 
-You do want to use skills.  A skill is a markdown file that tells the model what to do, often associated with a simple 
+A skill is a markdown file that tells the model what to do, often associated with a simple 
 bash/python/JS script.  Skills come in two forms:
 
 * Formal skills.  These are loaded by the agent harness and usually invoked with `/[skill-name]`{.text}.
-* Informal skills.  Raw instructions to the model.  
+* Informal skills.
   - Can live anywhere in the codebase, usually linked to (or occasionally lives in) AGENTS.md.
+  - Raw instructions to the model.
+  - May also have an associated script.  
   - Multiple 'skills' can live in a single markdown file (e.g. the debugging.md guide).
 * The running debugging guide from earlier slides is a collection of informal skills
 
@@ -428,31 +425,39 @@ When you tell an agent to create a tool for some task it will either:
 * Write an informal skill in some existing doc (e.g. AGENT.md or debugging.md) possibly 
   including a helper script.
 * Ask you if you want it to create a formal skill.  You can usually force this by saying 'create this skill'
-  which is why you should never use the word 'skill' when asking the model to create tools unless you want it 
+* Never use the word 'skill' when asking the model to create tools unless you want it 
   to create a formal skill.
-  
-For tests it's easier to use informal skills almost exclusively; this lets the agent 
-fix bugs in the skill, clone it to make specialized variants, etc.
 
 ### Refactoring
 
-Models are fairly good at refactoring (including across git submodule boundaries!).
+* Agents are fairly good at refactoring
+* Can handle git submodules
 
-An example refactoring run:
+### Refactoring - Example
 
+<p style="text-align: left;">
 **User:** I've noticed there's a bunch of duplicate code inside the consumers of this API.
+</p>
+<p style="text-align: left;">
 **Model:** You're right.  Here are all the places this is happening
+</p>
+<p style="text-align: left;">
 **User:** The duplicated code really belongs in the API itself.  Write a plan to do this.
+</p>
+
+### Refactoring - Example 2
 
 You can also simply command the model to do it directly:
 
+<p style="text-align: left;">
 **User:** The duplicated code really belongs in the API itself.  Move it inside the API.
-
-Note: modern agent harnesses will automatically create plans for complex tasks.
+</p>
 
 ### You Don't Always Want To Use Plan Mode
 
 * Not using plan mode is sometimes easier to iterate on
+* Claude is more reliable at following planning rules in CLAUDE.md if you 
+  command it to create a plan outside of plan mode itself.
 * Not needed for the immediate todo list workflow 
 
 ### Immediate Todo Workflow 

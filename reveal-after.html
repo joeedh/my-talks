@@ -4,6 +4,22 @@
 (function () {
   var printing = /print-pdf/.test(window.location.search);
 
+  // Persistent corner QR code, linking back to this talk's repo folder. It's
+  // a fixed-position element outside .slides, so it survives every slide
+  // transition without touching the deck markdown. Skipped when printing --
+  // a static PDF page doesn't benefit from a scannable link, and it would
+  // otherwise sit on top of content in the print layout.
+  if (!printing) {
+    var qr = document.createElement('a');
+    qr.id = 'qr-corner';
+    qr.href = 'https://github.com/joeedh/my-talks/tree/master/2026/09-codium-consortium';
+    qr.target = '_blank';
+    qr.rel = 'noopener';
+    qr.title = 'github.com/joeedh/my-talks/tree/master/2026/09-codium-consortium';
+    qr.innerHTML = '<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAYYAAAGGAQAAAABX+xtIAAADJElEQVR4nO1cUW6kMAx9CUj7CVIP0KOkN9gj7Zn2BnCgSsxnJZArx3EC8wWV2mYy9geFEquTvjjxe07GEa7Z5i86AOZR1/8KNOU7WjqiCR0BA7GtQOCf07Bqo2E1BM+br9IDNCm+cuEhoJeO4jhAkLeCfp398OZx3kiCeEhwx7sU5wp3eUuGeWsjcSACbj1oujmH+XUFZtcDYfnNT3XK/LlmO3tej/7umeY3wIVlhAP6FeH/y4p5fP/ZT+XN45sx7zh33wDcHCdtYLi7FfPfBcTB7sKyyYuv/Q1vHrXF+c3pw/De0zzy5fXDEbD1cuE4d6mJIfjwox2Sj0tSLjRNeVlg6ia5vKT2kt/X2Q9vHueNMvmWRF0SOb5Ehhaz9cjU2QzzFkYiShAnXsbBzom6DIZ0R6VJnf3w5vEVHQ5Cw2OcIysxStNIXpgm8/gjEaK4ShBHEUaUmAg8shzTye9Mk2kEc0pK22FG7w7reX5hcd4G5ktO3vPavZ/gy1IezdbzlmosYJALYdPBoGGP9KLOfnjzuD63U8rbU1El0fVUcFMSZ+t5CyMReyUmZea7NV7y9lxcg8V5E5iTzt7R9rVUzeWPlXT/A5/Km8e3czXkaqkKb3FuL9k6yaPFeVPaa6esXISZ/bSesrmFI95yuBYwJwGU75Waq05zlGJhentLmCMV0WMkHypstp43y88nydbzsq1MfafSwfg52vHYnPsnqsvmVGDfHMLCj8UGkWfr7cc180/rgaS4arZ+KJ6W8sqaq27G1RrAfMqreFnZpbxyt56TiDV19sObx3mjsjVCJNZsKYPXdpSC3f67581X6QHdC1GOKOXJnK1M62T8HE1pMkH4uebtx40T5YAL2dzeBObFBG49uaZyzIGzB1vPGzuXSilvv6ufC3ufrK6GZjyGCDafTRsBOaUWQ5wf3Zs06/gg2x+quh8XzT+tBw7nUnU7zH6CzzYYP2/xXOqHEwluHjP6WmmlyeIcjcZ50N0TuuU1f+3Ews2Nn7eBOcl6rkiXRJ2tsHdY/bwZzHF3p/ugyndPlI3vsDh/fMydfW/UaasTwesen/a+PWyZ0sEYAAAAAElFTkSuQmCC" alt="QR code linking to this talk\'s repo folder">';
+    document.body.appendChild(qr);
+  }
+
   if (printing) {
     // reveal's Print.activate() sequences itself with
     // `await new Promise(requestAnimationFrame)`. Headless Chrome under
@@ -111,5 +127,26 @@
 .reveal code.sourceCode, .reveal p > code, .reveal li > code {
   font-family: var(--r-code-font);
   font-size: 0.9em;
+}
+
+/* ---- corner QR code --------------------------------------------------
+   Fixed outside .slides so it stays put across every slide, including the
+   title slide's dark cover art -- hence the white card behind it. */
+#qr-corner {
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  z-index: 30;
+  display: block;
+  background: #fff;
+  padding: 4px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  line-height: 0;
+}
+#qr-corner img {
+  display: block;
+  width: 128px;
+  height: 128px;
 }
 </style>
