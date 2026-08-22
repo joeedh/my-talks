@@ -12,15 +12,12 @@ title-slide-attributes:
      Don't put them up here: anything between the YAML block and the first
      header becomes a blank slide, and YAML rejects freeform text like "[ ]:". -->
 
-## About the Front Page 
-
-I uploaded this talk to Google Gemini and told it to "create a diagram inspired by this talk".
-
-## Personal History With Agentic AI
+## Backstory
 
 * First started using agentic AI in March of this year.
 * JS to TS porting
 * Sculptcore
+* FaberLeaf
 * Visual novel creator
 
 ## Briefly Demo Sculptcore 
@@ -29,13 +26,25 @@ I uploaded this talk to Google Gemini and told it to "create a diagram inspired 
 
 ### JS to TS porting
 
-*  My first experiences with AI (Claude Code) were porting JS code to TS. This was very painful:
-  - Claude kept wanting to add types to each file individually, driving typechecking errors to zero
-    each time.
-  - This produced hilariously garbage code [CLAUDE: insert code snippet from path.ux's git history of
-    absurd uses of any Record etc].
-  - Told Claude Code to add types to all files at once with its own reasoning alone, and only
-    then drive typechecking errors to zero.  This worked.
+*  First experience with AI (Claude Code) was porting JS code to TS.  It was not a good experience:
+  - Anthropic's models are trained to port JS->TS one file at a time, driving all type errors to zero 
+    before going onto the next one.
+  - This produced hilariously garbage code (see next slide).
+  - Long story short, I told Claude Code to:
+    - Add types to all files at once with its own reasoning alone.
+	- Read the files again to double check its work.
+	- Finally drive typecheck errors to zero.
+
+#### Hilariously Garbage Code 
+
+```ts 
+class Bleh {
+	declare one: any 
+	declare two: Record<string, any>
+	three: unknown
+	four: Bleh & { childClassThing: unknown }
+}
+```
 
 ### Sculptcore
 
@@ -63,24 +72,12 @@ For what it's worth, when creating notes for this talk Claude had this to say:
 * The whole thing compiled only under `-fdelayed-template-parsing`{.text} — a clang MSVC-compat extension papering over two-phase lookup against an open overload set. The fix migrated ~124 call sites to a `Binder<T>::bind()` customization point.
 * **The AI wrote the method and constructor binders. Best result in the talk.**
 
-#### Why it worked (cont.)
-
-* **Why:** verification is nearly free. It compiles or it doesn't. And the refactor shipped behind a **zero-diff regeneration gate** — descriptors must regenerate byte-identical.
-* **The pattern:** leverage is highest where the problem is tedious-hard and the check is mechanical. Lowest where the check is taste.
-* Counterexample from the same work: node-addon-api's `CallbackInfo::Length()` returned `6e-310` garbage under clang-on-Windows. No model finds that — a spike did.
-
-### Eh, No.
-
-* Frontier models are perfectly capable of creating incredibly sophisticated tests.  
-* You may have to coax them into doing it (they prefer making headless tests) but they can do it.
-* For example. . .
-
 ### SBrush DSL
 
 * Sculptcore is designed to execute brush strokes on both the CPU and the GPU.  
 * Some sculpt brushes have exponential falloffs that never hit zero anywhere in the mesh,
   running them on the GPU greatly improves performance.
-* So like any good computer graphics engineer, I made a DSL! 
+* So like any good computer graphics engineer, I made a domain specific language (DSL)! 
 
 ### SBrush DSL — example
 
@@ -98,10 +95,8 @@ brush Draw {
 ```
 
 ### I had Claude do it
-
-Actually I had Claude create it:
-
-* I asked Claude to redesign a DSL that supported autodiff and could (eventually)
+* I've implemented enough compilers in my life
+* Asked Claude to design a DSL that supported autodiff and could (eventually)
   be extended to meet all of our compute needs for sculpt brush evaluation.
 * No problem for Claude 
 
@@ -110,9 +105,6 @@ Actually I had Claude create it:
 * Wrote a parser and code emitters for C++ and WGSL.
 * Created--without me asking--a sophisticated testing framework to test 
   that all compute backends produce identical results.
-* Made me install two separate WGSL compilers:
-  - The one used by Google's WebGPU implementation
-  - Another one more typically used for compiling to Vulkan
 * This was done to be absolutely sure the testing environment was correct to real-world use.
 
 ### Sadly This Is Not Normal
@@ -121,16 +113,6 @@ Actually I had Claude create it:
   frameworks with such little (none!) developer input.
 * They are great at writing math tests however.
 * We'll come back to this later 
-
-### Later Developments
-
-* Claude is shockingly good at implementing complicated math & graph stuff 
-  from very brief prompts.
-  - A UV-preserving polygonal mesh remesher
-  - Polynomial clothoids
-* I had Claude create a Blender addon for sculptcore; I used it to create:
-  - A fork of Blender with minimal changes to its addon API.
-  - Github workflows to compile and publish builds.
   
 ## Practical Software Engineering
 
@@ -205,6 +187,12 @@ model might, etc.  The context hierachy typically looks like this (in order of i
 * Claude Opus and Fable will double-check this context against the current state of the codebase.  I think most 
   frontier models are trained to do this but I've not tested it.
 
+### The 'House Style'
+* Anthropic's models derive a 'house' prose style from CLAUDE.md.
+* Other models likely do the same
+* If you find the model starts writing strangely-worded prose start at 
+  your AGENTS.md equivalent.
+
 ### How to Edit Your AGENTS.md Equivalent
 
 Make the harness do it, e.g.:
@@ -225,12 +213,18 @@ purview of linters/formatters.
 
 #### Code Comment Rules 
 
-This is extremely important to prevent the models from cluttering your codebase 
-with verbose out of date comments (and poison your agent's ability to accurately build context).
+* Coding agents by default will tend to clutter the codebase with temporary comments.
+* These poison the context.
+* Easy to prevent in AGENTS.md:
 
-I recommend these rules:
+Do not use more than X lines for *permanent non-doc* comments except for extremely math-heavy comments.
 
-* Do not use more than X lines for *permanent non-doc* comments except for extremely math-heavy comments.
+**User**: Add these rules to AGENTS.md: permanent non-doc comments cannot be more then 4 lines except 
+          every 500 lines; temporary comments must start with AGENTNOTE: for later stripping.  
+		  Doc comments (e.g. jsdoc /** */) should be kept reasonably concise. 
+
+#### Code Comment Rule Exceptions 
+  
 * You will need an exception policy, e.g.:
   - You may write longer comments every X lines (e.g. 500).
   - Long comments must be approved by the user, you must keep track of them in 
@@ -248,10 +242,28 @@ I recommend these rules:
 
 * If you have an existing codebase Claude will use the prose 
   style of its comments.
-* If not the prose style drift into Yoda-like statements the model
+* If not the prose style may drift into Yoda-like statements the model
   finds more convientent but are unreadable to humans.
-* If this happens just complain to the model and have it insert a 
-  comment style rule into claude.md and fix all outstanding comments.
+* There is a comment prose style guide in talk notes (CommentStyle.md).
+  You can:
+  - Drop it into AGENTS.md 
+  - Or tell your agent to create a skill from it, e.g. 'create a skill that enforces the prose style in CommentStyle.md'
+  - You can also use it to clean up your AGENTS.md's style:
+    - **User:** 'Make AGENTS.md follow the prose style rules in CommentStyle.md (we are changing to house style)'
+	- note how we tell the agent our goal.
+* CommentStyle.md is fairly large; you shouldn't need to embedd the whole thing into AGENTS.md 
+  unless things are already broken.
+
+#### Comments For From Scratch Projects
+* Work out a comment prose style early if creating a project 
+  from scratch, since the model has no examples in the codebase 
+  to work from.
+* I had to have claude fix all the comments in a from-scratch project 
+  - Used claude code's ultracode feature to use lots of agents in parallel.
+  - Burned through 13 million tokens.
+  - Cost about $150
+  - Note: this was full unsubsidized token cost (I had run out of my max plan 
+          usage for that week).
 
 #### Debugging
 
@@ -259,7 +271,7 @@ It's important the model writes down how it debugged something so it can remembe
 without having to spend the (possibly hours, possibly requiring you the developer's help)
 time re-discovering it.  For example:
 
-'Update Claude.MD: create a running debugging guide/lessons-learned (in docs/debugging.md) that's updated after each plan'
+**User:** Update Claude.MD: create a running debugging guide/lessons-learned (in docs/debugging.md) that's updated after each plan'
 
 #### Folder Structure
 

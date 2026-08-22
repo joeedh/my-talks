@@ -6,9 +6,11 @@
     "build": "python build.py",
     "serve": "python build.py --serve",
     "pdf": "python build.py --pdf",
-    "site": "python build.py --site --pdf"
+    "site": "python build.py --site --pdf",
+    "watch": "chokidar \"**/*\" -i \"dist/**\" -i \"node_modules/**\" -i \".git/**\" -c \"python build.py --site\""
   },
   "devDependencies": {
+    "chokidar-cli": "^3.0.0",
     "reveal.js": "^5.1.0"
   }
 }
