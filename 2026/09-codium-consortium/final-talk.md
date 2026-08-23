@@ -214,9 +214,9 @@ purview of linters/formatters.
 
 Do not use more than X lines for *permanent non-doc* comments except for extremely math-heavy comments.
 
-**User**: Add these rules to AGENTS.md: permanent non-doc comments cannot be more then 4 lines except 
-          every 500 lines; temporary comments must start with AGENTNOTE: for later stripping.  
-		  Doc comments (e.g. jsdoc /** */) should be kept reasonably concise. 
+<p style="text-align: left;">
+**User**: Add these rules to AGENTS.md: permanent non-doc comments cannot be more then 4 lines except every 500 lines; temporary comments must start with AGENTNOTE: for later stripping.  Doc comments (e.g. jsdoc /** */) should be kept reasonably concise. 
+</p>
 
 #### Code Comment Rule Exceptions 
   
@@ -266,7 +266,9 @@ It's important the model writes down how it debugged something so it can remembe
 without having to spend the (possibly hours, possibly requiring you the developer's help)
 time re-discovering it.  For example:
 
+<p style="text-align: left;">
 **User:** Update Claude.MD: create a running debugging guide/lessons-learned (in docs/debugging.md) that's updated after each plan'
+</p>
 
 #### Folder Structure
 
@@ -283,9 +285,12 @@ Claude Code for some reason does not, even though there are real benefits to doi
 
 Create an empty git repo, start claude.
 
-Prompt: 
+### Prompt 
 
+<p style="text-align: left;">
 Create a CLAUDE.md with the following rules:
+</p>
+
 * permanent non-doc code comments cannot be more then 4 lines except every 500 lines.
 * temporary code comments have no limit but must start with AGENTNOTE: for later stripping.
 * create a running debugging guide/lessons-learned in docs/debugging.md.
@@ -309,12 +314,17 @@ Plans are well, that: plans created by agents.
 
 Prompt:
 
+
+<p style="text-align: left;">
 Create a plan to write a tetris game:
+</p>
+
 * Use native typescript tsgo, pnpm, eslint, prettier
 * serve with esbuild's http server.  
 * Create an Electron shell.  
 * plan should make sure CLAUDE.md is up to date when it's done. 
 * You may use either Playwright or the Electron shell for integration tests.
+When the plan is done, execute the plan
 
 #### Pressure Testing Plans 
 
@@ -326,17 +336,27 @@ Create a plan to write a tetris game:
 
 For example:
 
+<p style="text-align: left;">
 **User:** Use an agent to pressure test plan at X
+</p>
+<p style="text-align: left;">
 ...model works 
+</p>
+<p style="text-align: left;">
 **Model:** Agent found X errors.  Want me to fold them into the plan?
+</p>
+<p style="text-align: left;">
 **User:** Yes
+</p>
 
 #### Pressure Testing Plans 
 
 Claude Code doesn't always ask you if you want to apply the pressure testing results.
 Do not assume it has done so, e.g.:
 
+<p style="text-align: left;">
 **User:** Did you fold the pressure testing results into the plan?
+</p>
 
 #### Task Lists 
 
@@ -344,19 +364,23 @@ For particularly large tasks that require multiple plans you can create a task l
 This is often done after a high-level discussion with the model, possibly after it has
 created a research report.  For example:
 
-* **User:** I want to support X feature.  How would that work.
-* **Agent:** Maybe like this.  Should I write a report?
-* **User:** Do that.  Also create a master task list to keep track 
+<p style="text-align: left;">
+**User:** I want to support X feature.  How would that work.
+</p>
+<p style="text-align: left;">
+**Agent:** Maybe like this.  Should I write a report?
+</p>
+<p style="text-align: left;">
+**User:** Do that.  Also create a master task list to keep track 
   of plans in docs/plans/feature-task-list.md.
+</p>
 
 Make sure to tell the agent to save the task list to a file, some harnesses 
 support a temporary in-memory task list.
 
-### DEMO:
+### Task List Example:
 
-Use `/clear` to clear the claude conversation context.
-
-Prompt: 
+Prompt (we won't be running this now to save time):  
 
 * Use an agent to pressure test the plan.
 * Create a task list in docs/plans/tasklist.md:
@@ -499,13 +523,21 @@ watchers, typecheck servers or dev servers that hold the directory's lock and ki
 
 ### Using worktrees (Claude Code)
 
+<p style="text-align: left;">
 **User:** In a new worktree do X
+</p>
+<p style="text-align: left;">
 **User:** In a new worktree execute the plan at docs/plans/XXX.md
+</p>
 
 When done:
 
+<p style="text-align: left;">
 **User:** merge into master and tear down the worktree
+</p>
+<p style="text-align: left;">
 **User:** push to git and open a PR in github, then tear down the worktree
+</p>
 
 ### DEMO 
 
@@ -519,15 +551,19 @@ If you find yourself needing to use NWJS (basically single-process Electronjs, i
 you will have to tell Claude to jump through some hoops to allow multiple independent nwjs instances
 (e.g. for tests):
 
+<p style="text-align: left;">
 **User:** I want to be able to run multiple instances of the nwjs shell at once.  This will require 
 creating temporary lightweight Chromium profile directories.  Be absolutely sure those directories 
 are deleted on exit as they can add up to quite a lot of disk space.
+</p>
 
 #### NWJS/Electron crashpad 
 
 You can also have Claude set up Chromium's automated crashpad system:
 
+<p style="text-align: left;">
 **User:** Make sure NWJS crashpad works and you are able to read its dump files.
+</p>
 
 
 
