@@ -558,6 +558,16 @@ In a new worktree do the items in todo.md
 
 ## Gotchas 
 
+## Claude's Auto Mode 
+
+* Uses a small LLM to approve agent actions (the 'classifier').
+* If the agent goes into a loop with the classifier denying request, 
+  interrupt it and give more explicit permission.
+* **Model:** Want me to commit to git, push then start tests?
+* **User:**: Yes commit to git and push then start the tests.
+* If you simply answer 'yes' the auto classifier may not classify that as 
+  specific enough permission.
+  
 ### Debugging Model Confusion
 
 * You can ask your agent to analyze session transcripts to find where the model 
