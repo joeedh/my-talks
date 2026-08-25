@@ -122,11 +122,16 @@ https://github.com/joeedh/ai-quicktests
 
 ### Terminology:
 
-* Agent Harness - the software that interfaces with the AI model.
+* Agent Harness: the software that interfaces with the AI model.
 * AGENTS.md: the root context memory file, may also be called CLAUDE.MD 
              GEMINI.MD etc depending on your specific harness.
 * The model: the active large language model 
-
+* Effort: the model reasoning effort.  Higher effort level makes the model 
+          spend more time (and tokens) reasoning out problems.
+  - For Claude: large-scale refactors typically require 'high' or 'xhigh'.
+  - Routine tasks in thoery should take no more then 'medium' on frontier models,
+    but this varies by model; you'll have to experiment.
+	
 ### Interrupting The Model
 
 * You can interrupt coding agents with 'escape' or by pressing a stop button.
@@ -136,8 +141,9 @@ https://github.com/joeedh/ai-quicktests
 ### Agent Harnesses 
 
 * LLMs are useless by themselves, they require harnesses.
-* When people say 'Claude' they almost always mean an official Anthropic harness.
-* An agent harness provides tools to the model it can use to do things on your computer.
+* When people say 'Claude' they almost always mean an official Anthropic harness,
+  often Claude Code the coding harness.
+* Harnesses provide the tools the model needs to do things.
 
 ## Resuming Sessions 
 
@@ -179,8 +185,13 @@ model might, etc.  The context hierachy typically looks like this (in order of i
 
 * When the agent is asked to do a task it will read AGENTS.md, and follow any relevant links to useful documentation.
 * It may use a subagent to synthesize everything into a more detailed report 
-* Claude Opus and Fable will double-check this context against the current state of the codebase.  I think most 
-  frontier models are trained to do this but I've not tested it.
+* It may use a special vector embedded database for search:
+  - Claude Code doesn't do this.
+  - Cursor and a few other agent harnesses do.  
+  - Suffers from 'unwanted coupling', e.g. a search result containing 
+    all the callers of a function when searching for the function's definition.
+  - Easy to avoid with traditional textual search.
+* It will double-check anything it finds against the codebase.
 
 ### The 'House Style'
 * Anthropic's models derive a 'house' prose style from CLAUDE.md.
@@ -544,6 +555,8 @@ When done:
 Prompt:
 
 In a new worktree do the items in todo.md 
+
+## Gotchas 
 
 ### Debugging Model Confusion
 
