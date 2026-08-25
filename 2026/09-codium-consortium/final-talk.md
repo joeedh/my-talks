@@ -545,6 +545,27 @@ Prompt:
 
 In a new worktree do the items in todo.md 
 
+### Debugging Model Confusion
+
+* You can ask your agent to analyze session transcripts to find where the model 
+  spent the most time.
+* Use cheap models like Claude Haiku or Sonnet for this. 
+* You may need to refactor/split a large (and often-used) file.
+  - Problem is files the model that are both large and often read by the model.
+
+### Model Confusion Example 
+
+* Consumers of my path.ux framework build their own memory notes explaning its convoluted 
+  menu code.
+* My attempt to get path.ux to generate its own documentation tied into CLAUDE.md failed to 
+  prevent model confusion over the file.
+* Ended up having claude refactor the menu code.
+ - cleaned up duplicate code
+ - split into multiple files
+ - etc
+* Also had it split the base widget class into multiple files 
+ - By extracting logic into functions in new files 
+
 ### NWJS 
 
 If you find yourself needing to use NWJS (basically single-process Electronjs, it's easier to debug)
@@ -564,6 +585,7 @@ You can also have Claude set up Chromium's automated crashpad system:
 <p style="text-align: left;">
 **User:** Make sure NWJS crashpad works and you are able to read its dump files.
 </p>
+
 
 
 
