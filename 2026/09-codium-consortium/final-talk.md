@@ -112,31 +112,35 @@ Human review of assets is built into the app.
 
 ## Practical Software Engineering
 
-Enough history for now.  Time for the good part.
-
-There's a basic ai project template generator at:
-
-https://github.com/joeedh/ai-quicktests
-
-![](qr-ai-quicktests.png){width=40%}
+Enough history.  How do you use coding agents to 
+do real work?
 
 ### Terminology:
 
-* Agent Harness: the software that interfaces with the AI model.
+* Agent Harness: the software that interfaces with the AI model.  Provides the tools the model uses to do tasks on your computer.
 * AGENTS.md: the root context memory file, may also be called CLAUDE.MD 
              GEMINI.MD etc depending on your specific harness.
 * The model: the active large language model 
 * Effort: the model reasoning effort.  Higher effort level makes the model 
           spend more time (and tokens) reasoning out problems.
-  - For Claude: large-scale refactors typically require 'high' or 'xhigh'.
-  - Routine tasks in thoery should take no more then 'medium' on frontier models,
-    but this varies by model; you'll have to experiment.
-	
-### Interrupting The Model
 
-* You can interrupt coding agents with 'escape' or by pressing a stop button.
-* Ask the model questions, or give it further instructions.
-* Type 'continue'
+### Which Model To Use 
+
+Agent harnesses provide multiple models: 
+* Varying levels of intelligence.
+* Check the pricing.
+* Find equivalents to Anthropic's models for your agent
+	- Fable: most expensive, compare to GPT 5.6 Sol.
+	- Opus: below Fable, compare to GPT 5.5 
+	- Sonnet: the cheapest practical model, compare to Gemini 3.1 Problem
+	- Haiku: ultracheap model meant for code analysis
+* You will have to experiment 
+
+### Model Effort 
+
+* You will have to experiment with effort .
+* Medium and below are typically priced more cheaply.
+* Some models perform poorly on higher effort levels.
 
 ### Agent Harnesses 
 
@@ -144,6 +148,12 @@ https://github.com/joeedh/ai-quicktests
 * When people say 'Claude' they almost always mean an official Anthropic harness,
   often Claude Code the coding harness.
 * Harnesses provide the tools the model needs to do things.
+
+### Interrupting The Model
+
+* You can interrupt coding agents with 'escape' or by pressing a stop button.
+* Ask the model questions, or give it further instructions.
+* Type 'continue'
 
 ## Resuming Sessions 
 
@@ -250,6 +260,10 @@ Do not use more than X lines for *permanent non-doc* comments except for extreme
   style of its comments.
 * If not the prose style may drift into Yoda-like statements the model
   finds more convientent but are unreadable to humans.
+  - This may be a temporary bug in Claude model.
+
+#### Comment Prose 
+
 * There is a comment prose style guide in talk notes (CommentStyle.md).
   You can:
   - Drop it into AGENTS.md 
@@ -562,10 +576,14 @@ In a new worktree do the items in todo.md
 
 * Uses a small LLM to approve agent actions (the 'classifier').
 * If the agent goes into a loop with the classifier denying request, 
-  interrupt it and give more explicit permission.
-* **Model:** Want me to commit to git, push then start tests?
-* **User:**: Yes commit to git and push then start the tests.
-* If you simply answer 'yes' the auto classifier may not classify that as 
+  interrupt it and give more explicit permission:
+<p style="text-align: left;">
+**Model:** Want me to commit to git, push then start tests?
+</p>
+<p style="text-align: left;">
+**User:**: Yes commit to git and push then start the tests.
+</p>
+* If you simply answered 'yes' the auto classifier may not classify that as 
   specific enough permission.
   
 ### Debugging Model Confusion
