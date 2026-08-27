@@ -167,8 +167,8 @@ Agent harnesses provide multiple models:
 * Current conventional wisdom is to use a window that's less than 500k in size
   - Avoids the dreaded 'middle rot' where the model starts ignoring tokens in the 
   middle of the context window.
-  - Claude Code can be configured to use smaller context windows 
-    [CLAUDE: insert instructions on doing so here]
+  - Claude Code can be configured to use smaller context windows
+    with /autocompact
 
 ### Basic Mental Model For Context
 
