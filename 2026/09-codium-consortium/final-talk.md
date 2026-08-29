@@ -41,16 +41,11 @@ class Bleh {
 	- Read the files again to double check its work.
 	- Finally drive typecheck errors to zero.
 
+### Things Got better
+
 ### Sculptcore
 
-* Sculptcore: digital sculpting system I designed years ago.
-* Meant to be embedded in host 3D digital content creation (DCC) apps like Blender or Maya.
-* Includes bits of original research I had done for the Blender foundation (but never made it into 
-  Blender).
-* Project stalled due to the sheer work involved.
-* Used Claude Code heavily to finish the work 
-
-## Briefly Demo Sculptcore 
+* Demo
 
 ### Example of What Frontiers Model Can Do: SBrush DSL
 
@@ -94,22 +89,6 @@ brush Draw {
 * Math-heavy tasks (including math-heavy language compilers) are an exception.
 * We'll come back to this later.
 
-## Visual Novel Creator
-
-Generative AI pipeline for creating visual novels, created from scratch with Claude Code. 
-
-A user (or an AI agent) writes:
-* Story notes (e.g. locations, characters, history)
-* Scene scripts
-
-The app generates AI artwork with google gemini.  Artwork 
-form a tree of reference images, prior reference images are 
-fed to gemini for reference (e.g. portrat -> character model sheet -> shot).
-
-Human review of assets is built into the app. 
-
-## Briefly Demo Visual Novel Creator
-
 ## Practical Software Engineering
 
 Enough history.  How do you use coding agents to 
@@ -117,16 +96,17 @@ do real work?
 
 ### Terminology:
 
-* Agent Harness: the software that interfaces with the AI model.  Provides the tools the model uses to do tasks on your computer.
-* AGENTS.md: the root context memory file, may also be called CLAUDE.MD 
+* **Agent Harness**: the software that interfaces with the AI model.  Provides the tools the model uses to do tasks on your computer.
+* **AGENTS.md**: the root context memory file, may also be called CLAUDE.MD 
              GEMINI.MD etc depending on your specific harness.
-* The model: the active large language model 
-* Effort: the model reasoning effort.  Higher effort level makes the model 
+* **The model**: the active large language model 
+* **Effort**: the model reasoning effort.  Higher effort level makes the model 
           spend more time (and tokens) reasoning out problems.
 
 ### Which Model To Use 
 
 Agent harnesses provide multiple models: 
+
 * Varying levels of intelligence.
 * Check the pricing.
 * Find equivalents to Anthropic's models for your agent
@@ -178,30 +158,29 @@ Agent harnesses provide multiple models:
   - Custom skills (usually just the descriptions of them, models will load full skill files later).
   - Other instructions.
 
-### Basic Mental Model For Context (cont.)
+### "Memory"
 
-Most context (or memory) files are simple markdown file with links to other documents, important information the 
-model might, etc.  The context hierachy typically looks like this (in order of insertion into the prompt):
-
-* A root 'memory' file is appended to the system prompt.  Depending on the harness this might be
-  AGENTS.md, CLAUDE.md, GEMINI.md, etc
-* Some kind of external memory store associated with this project.  In Claude Code this is a markdown file:
-  - Flat list of links to other 'memory' markdown files
-  - Lives in the user's home folder
-  - Is associated with a specific repo
-* Basically there's context memory that's committed to the repo (AGENTS.md) and memory that's not.
+* Tree of linked markdown files starting from a root
+* This root is prepended to the system prompt
+* Can be called AGENTS.md, CLAUDE.md, GEMINI.md, etc
+* External memory`:
+  - Flat list of links to other 'memory' markdown files.
+  - Lives in the user's home folder.
+  - Is associated with a specific repo but does not live inside of it.
 
 ### Basic Mental Model For Context (cont.)
 
 * When the agent is asked to do a task it will read AGENTS.md, and follow any relevant links to useful documentation.
 * It may use a subagent to synthesize everything into a more detailed report 
+* It will double-check anything it finds against the codebase.
+
+## Basic Mental Model -- Vector Embedded Databases
 * It may use a special vector embedded database for search:
   - Claude Code doesn't do this.
   - Cursor and a few other agent harnesses do.  
   - Suffers from 'unwanted coupling', e.g. a search result containing 
     all the callers of a function when searching for the function's definition.
   - Easy to avoid with traditional textual search.
-* It will double-check anything it finds against the codebase.
 
 ### The 'House Style'
 * Anthropic's models derive a 'house' prose style from CLAUDE.md.
@@ -316,14 +295,15 @@ Create an empty git repo, start claude.
 Create a CLAUDE.md with the following rules:
 </p>
 
-* permanent non-doc code comments cannot be more then 4 lines except every 500 lines.
-* temporary code comments have no limit but must start with AGENTNOTE: for later stripping.
-* create a running debugging guide/lessons-learned in docs/debugging.md.
-* design documentation go in docs/
-* research and reports go in docs/research 
-* plans should always be saved to the repo and go in docs/plans
-* plans should be pressure tested with an agent and the results folded back into the plan 
-  after creation.
+<p style="text-align: left;">
+* Permanent non-doc code comments cannot be more then 4 lines except every 500 lines.
+* Temporary code comments have no limit but must start with AGENTNOTE: for later stripping.
+* Create a running debugging guide/lessons-learned in docs/debugging.md.
+* Design documentation go in docs/
+* Research and reports go in docs/research 
+* Plans should always be saved to the repo and go in docs/plans
+</p>
+  
 
 ### Plans
 
@@ -627,6 +607,18 @@ You can also have Claude set up Chromium's automated crashpad system:
 **User:** Make sure NWJS crashpad works and you are able to read its dump files.
 </p>
 
+### Research
+
+* AI is great for writing research reports
+* Basic research-assisted feature workflow:
+  - 'Write a research survey report on X feature'
+  - _Discuss possibilities with model_
+  - 'Write an implementation plan'
+  - 'Execute plan'
+  - 'Write documentation'
+  
+* For Claude Code, avoid anything that triggers their 'ultracode'
+  workflow that spins up dozens of agents (it's extremely expensive).
 
 
 
