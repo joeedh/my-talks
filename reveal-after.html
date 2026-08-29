@@ -52,6 +52,41 @@
       slideNumber: 'c/t',
       pdfSeparateFragments: false
     });
+
+    // reveal fits its fixed-size slide to the CSS-pixel size of `.reveal`
+    // (its own layout() takes no arguments -- it always re-measures
+    // `.reveal`'s offsetWidth/offsetHeight itself, so there's no hook to feed
+    // it a corrected size). Browser zoom shrinks that CSS-pixel box (fewer
+    // CSS px are visible) by exactly the zoom factor, so reveal scales the
+    // deck back up to fill it -- zoom and reveal's own re-fit cancel out and
+    // the deck never visibly grows.
+    //
+    // Since reveal's measurement can't be intercepted, compensate a layer
+    // above it instead: wrap `.reveal` in a plain div and apply our own
+    // `transform: scale()` to that wrapper. A CSS transform doesn't change
+    // offsetWidth/offsetHeight, so reveal keeps computing its fit from the
+    // unscaled box underneath -- our wrapper's scale rides on top of that,
+    // unopposed, the same way zoom would on an ordinary (non-reveal) page.
+    var reveal = document.querySelector('.reveal');
+    var zoomWrap = document.createElement('div');
+    zoomWrap.id = 'zoom-compensator';
+    reveal.parentNode.insertBefore(zoomWrap, reveal);
+    zoomWrap.appendChild(reveal);
+
+    var baseDPR = window.devicePixelRatio;
+    function applyZoomCompensation() {
+      zoomWrap.style.transform = 'scale(' + (window.devicePixelRatio / baseDPR) + ')';
+    }
+    applyZoomCompensation();
+
+    // There's no native "devicePixelRatio changed" event, so re-arm a
+    // matchMedia listener tuned to the current ratio each time it fires --
+    // the standard cross-browser way to detect zoom.
+    function watchZoom() {
+      var mq = window.matchMedia('(resolution: ' + window.devicePixelRatio + 'dppx)');
+      mq.addEventListener('change', function () { applyZoomCompensation(); watchZoom(); }, { once: true });
+    }
+    watchZoom();
   }
   if (typeof Reveal === 'undefined') return;
   if (Reveal.isReady && Reveal.isReady()) apply();
@@ -148,5 +183,15 @@
   display: block;
   width: 128px;
   height: 128px;
+}
+
+/* ---- zoom compensation -----------------------------------------------
+   Wraps .reveal so browser-zoom changes can scale the deck without reveal's
+   own viewport-fit layout measuring (and cancelling) the zoom. See the
+   zoom-compensator script above. */
+#zoom-compensator {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 50%;
 }
 </style>
