@@ -36,6 +36,7 @@ class Bleh {
 ```
 
 ### The solution
+
 * I had Claude Code create a Javascript to Typescript conversion skill that worked in stages:
 	- Adds types to all files with the model's own reasoning; it is not allowed to invoke the typechecker.
 	- Read the files again to double check its work.
@@ -70,64 +71,78 @@ brush Draw {
 ```
 
 ### SBrush DSL [contd]
-* I've implemented enough compilers in my life
-* So I asked Claude to design a DSL that supported autodiff and could (eventually)
-  be extended to meet all of our compute needs for sculpt brush evaluation.
-* The result was impressive.
+
+* Implemented enough compilers in my life
+* I asked Claude to design a DSL that supported autodiff and could (eventually)
+  be extended to meet all of our compute needs for sculpt brush evaluation
+* The result was impressive
 
 ### Claude
 
-* Wrote a parser and code emitters for C++ and WGSL.
+* Wrote a parser and code emitters for C++ and WGSL
 * Created--without me asking--a sophisticated testing framework to test 
-  that all compute backends produce identical results.
-* This was done to be absolutely sure the testing environment was correct to real-world use.
+  that all compute backends produce identical results
+* This was done to be absolutely sure the testing environment was correct to real-world use
 
 ### Sadly This Is Not Normal
 
-* Anthropic's models are not *that* great at creating testing
-  frameworks with such little developer input.
-* Math-heavy tasks (including math-heavy language compilers) are an exception.
-* We'll come back to this later.
+* Anthropic's models are not *that* great at creating tests
+* Math-heavy tasks (including math-heavy language compilers) seem to be an exception
+* We'll come back to this later
 
 ## Practical Software Engineering
 
-Enough history.  How do you use coding agents to 
-do real work?
+Enough history, how do I use coding agents to do real work?
 
-### Terminology:
+### First Some Terminology
 
-* **Agent Harness**: the software that interfaces with the AI model.  Provides the tools the model uses to do tasks on your computer.
-* **AGENTS.md**: the root context memory file, may also be called CLAUDE.MD 
-             GEMINI.MD etc depending on your specific harness.
-* **The model**: the active large language model 
+* **Agent Harness**: the software that interfaces with the AI model.  Provides the tools the model uses to do tasks on your computer
+* **The model**: the active large language model
+* **AGENTS.md**: the root context memory file, may also be called CLAUDE.MD.
+             GEMINI.MD etc depending on your specific harness
 * **Effort**: the model reasoning effort.  Higher effort level makes the model 
-          spend more time (and tokens) reasoning out problems.
+          spend more time (and tokens) reasoning out problems
 
-### Which Model To Use 
+### Agent Harnesses
 
-Agent harnesses provide multiple models: 
+* Interface between user and LLM
+* Provides tools (API) the LLM can use to do real work
+* When people say 'Claude' they almost always mean an official Anthropic harness,
+  usually Claude Code
+* Harnesses provide the tools the model needs to do things
+
+### Harnesses Can Be Bad
+
+* Made this with Hermes and a harness I wrote myself with only two tools:
+  - Bash
+  - Remote Chrome Debugging (CDP)
+* Used the absurdly cheap GLM-5.3-flash model for both
+* Hermes used a lot less tokens but took orders of magnitude longer to produce an inferior product
+
+### Which Model To Use
+
+Agent harnesses provide multiple models:
 
 * Varying levels of intelligence.
 * Check the pricing.
 * Find equivalents to Anthropic's models for your agent
-	- Fable: most expensive, compare to GPT 5.6 Sol.
-	- Opus: below Fable, compare to GPT 5.5 
-	- Sonnet: the cheapest practical model, compare to Gemini 3.1 Problem
-	- Haiku: ultracheap model meant for code analysis
-* You will have to experiment 
+  - Fable: most expensive, compare to GPT 5.6 Sol.
+  - Opus: below Fable, compare to GPT 5.5 or GLM-5.3-
+    - Kind of a crappy model
+  - Sonnet: the cheapest practical model, compare to Gemini 3.1 Problem
+  - Haiku: ultracheap model meant for code analysis
+* You will have to experiment
 
 ### Model Effort 
 
-* You will have to experiment with effort .
+* Experiment with the settings for your model.
 * Medium and below are typically priced more cheaply.
 * Some models perform poorly on higher effort levels.
+* Some use thinking token budgets instead of effort levels.
 
-### Agent Harnesses 
+### How Models Think
 
-* LLMs are useless by themselves, they require harnesses.
-* When people say 'Claude' they almost always mean an official Anthropic harness,
-  often Claude Code the coding harness.
-* Harnesses provide the tools the model needs to do things.
+* Write long 
 
 ### Interrupting The Model
 
@@ -299,8 +314,9 @@ Create a CLAUDE.md with the following rules:
 * Permanent non-doc code comments cannot be more then 4 lines except every 500 lines.
 * Temporary code comments have no limit but must start with AGENTNOTE: for later stripping.
 * Create a running debugging guide/lessons-learned in docs/debugging.md.
-* Design documentation go in docs/
-* Research and reports go in docs/research 
+* When writing documents/reports/plans use bullet points to achieve good LLM  
+  readability and improve token efficiency.
+* Design docs for in docs/ research/reports in docs/research
 * Plans should always be saved to the repo and go in docs/plans
 </p>
   
@@ -648,4 +664,10 @@ TODO:
 [ ] mention pressure testing plans 
 [ ] make section headers have a consistent title case style, use whatever the 
     most common case styling.
-=========================================================================== -->
+=========================================================================== 
+
+prep:
+open terminals to both sonic games
+open terminal to faberleaf
+open terminal to thinking demo in this folder
+-->

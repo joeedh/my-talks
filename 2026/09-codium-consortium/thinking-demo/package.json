@@ -1,0 +1,7 @@
+{
+    "type": "module",
+    "devDependencies": {
+        "@openrouter/sdk": "^1.2.102",
+        "@types/node": "^26.4.1"
+    }
+}
